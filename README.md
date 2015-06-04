@@ -102,5 +102,5 @@ Importing the library
     }
 
     dependencies {
-        compile 'com.tehmou:rx-android-stores:+'
+        compile 'com.tehmou:rx-android-stores:0.0.1'
     }
