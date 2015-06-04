@@ -52,9 +52,43 @@ This can be used for querying all foobars with "foobars":
 In the latter one we need to replace the default getWhere function since we want to query all foobards without any conditions.
 
 
-### ContentProvider
+### Defining the ContentProvider
 
 For an entire ContentProvider check [ExampleContentProvider](https://github.com/tehmou/rx-android-stores/blob/master/app/src/main/java/com/tehmou/rxandroidstores/example/provider/ExampleContentProvider.java)
+
+
+### Creating a Store
+
+A Store is an abstraction that uses an identifier to look for data items. The identifier is converted into path by appending to the contentUriBase.
+
+Item inserted must contain the necessary identifying information, usually an integer id field.
+
+
+    public class FoobarStore extends ContentProviderStoreBase<Integer, Foobar> {
+        public FoobarStore(ContentResolver contentResolver) {
+            super(contentResolver, ExampleContentProvider.createFoobarContract());
+        }
+
+        @Override
+        protected Integer getIdFor(Foobar item) {
+            return item.getId();
+        }
+
+        @Override
+        protected Uri getContentUriBase() {
+            return Uri.parse("content://" + ExampleContentProvider.PROVIDER_NAME + "/"
+                    + databaseContract.getTableName());
+        }
+    }
+
+Using the Store:
+
+    FoobarStore store = new FoobarStore(getContentResolver());
+    store.getStream(1234).subscribe(
+            value -> Log.d(TAG, "onNext: " + value.getValue());
+    store.put(new Foobar(1234, "My text"));
+
+The subscriber set before the put will receive the value as soon as it is inserted. Since the value is written into the ContentProvider you would see the previous one immediately if you restart.
 
 
 Importing the library
