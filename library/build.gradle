@@ -36,8 +36,8 @@ uploadArchives {
         repository(url: "file://${deployPath.absolutePath}")
         pom.project {
             groupId 'com.tehmou'
-            artifactId 'rx-android-architecture'
-            version "0.2"
+            artifactId 'rx-android-stores'
+            version "0.0.1"
         }
     }
 }
