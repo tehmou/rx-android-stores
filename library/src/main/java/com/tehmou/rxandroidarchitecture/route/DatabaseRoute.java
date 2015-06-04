@@ -10,7 +10,7 @@ import rx.functions.Action1;
 public interface DatabaseRoute {
     String getPath();
     String getTableName();
-    String getDefaultSortOrder();
+    String getSortOrder();
     String getWhere(Uri uri);
     String getMimeType();
     void notifyChange(Uri uri, Action1<Uri> notifyChange);

@@ -1,9 +1,11 @@
-package com.tehmou.bettercontentprovider;
+package com.tehmou.bettercontentprovider.example;
 
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import com.tehmou.bettercontentprovider.R;
 
 
 public class MainActivity extends ActionBarActivity {

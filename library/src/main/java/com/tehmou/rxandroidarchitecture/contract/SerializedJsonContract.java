@@ -1,6 +1,6 @@
 package com.tehmou.rxandroidarchitecture.contract;
 
-import android.database.Cursor;
+import android.util.Log;
 
 import com.google.gson.Gson;
 
@@ -9,7 +9,7 @@ import java.lang.reflect.Type;
 /**
  * Created by ttuo on 13/01/15.
  */
-abstract public class SerializedJsonContract<T> implements DatabaseContract<T> {
+abstract public class SerializedJsonContract {
     private static final String TAG = SerializedJsonContract.class.getSimpleName();
 
     public static final String ID = "id";
@@ -17,28 +17,37 @@ abstract public class SerializedJsonContract<T> implements DatabaseContract<T> {
 
     private static final String[] PROJECTION = new String[]{ ID, JSON };
 
-    public String getCreateTable() {
-        return " CREATE TABLE " + getTableName()
-                + " ( " + getCreateIdColumn() + ", "
-                + JSON + " TEXT NOT NULL);";
+    private static String getCreateTable(final String tableName,
+                                         final String idColumnType,
+                                         final String jsonColumn) {
+        return " CREATE TABLE " + tableName
+                + " (" + ID + " " + idColumnType + ", "
+                + jsonColumn + " TEXT NOT NULL);";
     }
 
-    public String getDropTable() {
-        return "DROP TABLE IF EXISTS " + getTableName();
+    private static String getDropTable(final String tableName) {
+        return "DROP TABLE IF EXISTS " + tableName;
     }
 
-    @Override
-    public String[] getProjection() {
-        return PROJECTION;
+    public static <T> DatabaseContractBase.Builder<T> createBuilder(final String tableName,
+                                                                    final Type type) {
+        return createBuilder(tableName, "INTEGER", type);
     }
 
-    abstract public String getTableName();
-    abstract protected String getCreateIdColumn();
-    abstract protected Type getType();
-
-    @Override
-    public T read(Cursor cursor) {
-        final String json = cursor.getString(cursor.getColumnIndex(SerializedJsonContract.JSON));
-        return new Gson().fromJson(json, getType());
+    public static <T> DatabaseContractBase.Builder<T> createBuilder(final String tableName,
+                                                                    final String idColumnType,
+                                                                    final Type type) {
+        Log.v(TAG, "createBuilder(" + tableName + ", " + idColumnType + ", " + type);
+        return new DatabaseContractBase.Builder<T>()
+                .setTableName(tableName)
+                .setCreateTableSql(getCreateTable(tableName, idColumnType, JSON))
+                .setProjection(PROJECTION)
+                .setDropTableSql(getDropTable(tableName))
+                .setGetDefaultWhereFunc(
+                        uri -> SerializedJsonContract.ID + " = " + uri.getLastPathSegment())
+                .setReadFunc(cursor -> {
+                    final String json = cursor.getString(cursor.getColumnIndex(JSON));
+                    return new Gson().fromJson(json, type);
+                });
     }
 }

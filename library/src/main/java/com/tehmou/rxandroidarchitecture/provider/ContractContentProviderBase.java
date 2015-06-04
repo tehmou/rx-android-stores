@@ -58,7 +58,7 @@ abstract public class ContractContentProviderBase extends ContentProviderBase {
 
     @Override
     protected String getDefaultSortOrder(int match) {
-        return getDatabaseRouteForMatch(match).getDefaultSortOrder();
+        return getDatabaseRouteForMatch(match).getSortOrder();
     }
 
     @Override

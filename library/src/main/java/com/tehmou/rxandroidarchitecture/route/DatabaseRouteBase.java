@@ -2,9 +2,10 @@ package com.tehmou.rxandroidarchitecture.route;
 
 import android.net.Uri;
 
+import com.tehmou.rxandroidarchitecture.contract.DatabaseContract;
+
 import rx.functions.Action1;
 import rx.functions.Action2;
-import rx.functions.Func0;
 import rx.functions.Func1;
 
 /**
@@ -13,7 +14,7 @@ import rx.functions.Func1;
 public class DatabaseRouteBase implements DatabaseRoute {
     private final String tableName;
     private final String path;
-    private final String defaultSortOrder;
+    private final String sortOrder;
     private final Func1<Uri, String> getWhereFunc;
     private final String mimeType;
     private Action2<Uri, Action1<Uri>> notifyChangeFunc;
@@ -21,7 +22,7 @@ public class DatabaseRouteBase implements DatabaseRoute {
     private DatabaseRouteBase(Builder builder) {
         this.tableName = builder.tableName;
         this.path = builder.path;
-        this.defaultSortOrder = builder.defaultSortOrder;
+        this.sortOrder = builder.sortOrder;
         this.getWhereFunc = builder.getWhereFunc;
         this.mimeType = builder.mimeType;
         this.notifyChangeFunc = builder.notifyChangeFunc;
@@ -42,8 +43,8 @@ public class DatabaseRouteBase implements DatabaseRoute {
     }
 
     @Override
-    public String getDefaultSortOrder() {
-        return defaultSortOrder;
+    public String getSortOrder() {
+        return sortOrder;
     }
 
     @Override
@@ -59,14 +60,16 @@ public class DatabaseRouteBase implements DatabaseRoute {
     public static class Builder {
         private String tableName;
         private String path;
-        private String defaultSortOrder;
+        private String sortOrder;
         private Func1<Uri, String> getWhereFunc;
         private String mimeType;
         private Action2<Uri, Action1<Uri>> notifyChangeFunc =
                 (uri, notifyChange) -> notifyChange.call(uri);
 
-        public Builder(String tableName) {
-            this.tableName = tableName;
+        public Builder(DatabaseContract databaseContract) {
+            this.tableName = databaseContract.getTableName();
+            this.sortOrder = databaseContract.getDefaultSortOrder();
+            this.getWhereFunc = databaseContract.getDefaultWhereFunc();
         }
 
         public Builder setNotifyChangeFunc(Action2<Uri, Action1<Uri>> notifyChangeFunc) {
@@ -79,8 +82,8 @@ public class DatabaseRouteBase implements DatabaseRoute {
             return this;
         }
 
-        public Builder setDefaultSortOrder(String defaultSortOrder) {
-            this.defaultSortOrder = defaultSortOrder;
+        public Builder setSortOrder(String sortOrder) {
+            this.sortOrder = sortOrder;
             return this;
         }
 
