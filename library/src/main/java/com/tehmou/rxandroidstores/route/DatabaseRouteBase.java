@@ -1,8 +1,8 @@
-package com.tehmou.rxandroidarchitecture.route;
+package com.tehmou.rxandroidstores.route;
 
 import android.net.Uri;
 
-import com.tehmou.rxandroidarchitecture.contract.DatabaseContract;
+import com.tehmou.rxandroidstores.contract.DatabaseContract;
 
 import rx.functions.Action1;
 import rx.functions.Action2;

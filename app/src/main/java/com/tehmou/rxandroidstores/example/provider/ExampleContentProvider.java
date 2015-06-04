@@ -1,21 +1,18 @@
-package com.tehmou.bettercontentprovider.example.provider;
+package com.tehmou.rxandroidstores.example.provider;
 
 import android.content.ContentValues;
-import android.net.Uri;
 
-import com.tehmou.bettercontentprovider.example.pojo.Foobar;
-import com.tehmou.rxandroidarchitecture.contract.DatabaseContract;
-import com.tehmou.rxandroidarchitecture.contract.SerializedJsonContract;
-import com.tehmou.rxandroidarchitecture.provider.ContractContentProviderBase;
-import com.tehmou.rxandroidarchitecture.route.DatabaseRouteBase;
-
-import rx.functions.Func1;
+import com.tehmou.rxandroidstores.example.pojo.Foobar;
+import com.tehmou.rxandroidstores.contract.DatabaseContract;
+import com.tehmou.rxandroidstores.contract.SerializedJsonContract;
+import com.tehmou.rxandroidstores.provider.ContractContentProviderBase;
+import com.tehmou.rxandroidstores.route.DatabaseRouteBase;
 
 /**
  * Created by ttuo on 04/06/15.
  */
 public class ExampleContentProvider extends ContractContentProviderBase {
-    public static final String PROVIDER_NAME = "com.tehmou.bettercontentprovider.example.provider.ExampleContentProvider";
+    public static final String PROVIDER_NAME = "com.tehmou.rxandroidstores.example.provider.ExampleContentProvider";
     private static final String DATABASE_NAME = "database";
     private static final int DATABASE_VERSION = 1;
 
@@ -24,7 +21,7 @@ public class ExampleContentProvider extends ContractContentProviderBase {
         addDatabaseContract(contract);
         addDatabaseRoute(
                 new DatabaseRouteBase.Builder(contract)
-                        .setMimeType("vnd.android.cursor.item/vnd.tehmou.android.bettercontentprovider.foobar")
+                        .setMimeType("vnd.android.cursor.item/vnd.tehmou.android.rxandroidstores.foobar")
                         .setPath(contract.getTableName() + "/*")
                         .build());
     }

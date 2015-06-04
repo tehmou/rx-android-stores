@@ -1,4 +1,4 @@
-package com.tehmou.bettercontentprovider.example.pojo;
+package com.tehmou.rxandroidstores.example.pojo;
 
 /**
  * Created by ttuo on 04/06/15.

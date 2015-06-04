@@ -1,4 +1,4 @@
-package com.tehmou.rxandroidarchitecture.provider;
+package com.tehmou.rxandroidstores.provider;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;

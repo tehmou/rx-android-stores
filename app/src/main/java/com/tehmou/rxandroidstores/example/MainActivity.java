@@ -1,4 +1,4 @@
-package com.tehmou.bettercontentprovider.example;
+package com.tehmou.rxandroidstores.example;
 
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -7,8 +7,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.tehmou.bettercontentprovider.R;
-import com.tehmou.bettercontentprovider.example.pojo.Foobar;
-import com.tehmou.bettercontentprovider.example.provider.FoobarStore;
+import com.tehmou.rxandroidstores.example.pojo.Foobar;
+import com.tehmou.rxandroidstores.example.provider.FoobarStore;
 
 
 public class MainActivity extends ActionBarActivity {

@@ -1,4 +1,4 @@
-package com.tehmou.rxandroidarchitecture.contract;
+package com.tehmou.rxandroidstores.contract;
 
 import android.content.ContentValues;
 import android.database.Cursor;

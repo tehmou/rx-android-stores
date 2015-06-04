@@ -1,4 +1,4 @@
-package com.tehmou.rxandroidarchitecture.store;
+package com.tehmou.rxandroidstores.store;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -10,7 +10,7 @@ import android.os.HandlerThread;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.tehmou.rxandroidarchitecture.contract.DatabaseContract;
+import com.tehmou.rxandroidstores.contract.DatabaseContract;
 
 import java.util.ArrayList;
 import java.util.List;

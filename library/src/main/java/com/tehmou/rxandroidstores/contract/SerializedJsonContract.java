@@ -1,4 +1,4 @@
-package com.tehmou.rxandroidarchitecture.contract;
+package com.tehmou.rxandroidstores.contract;
 
 import android.content.ContentValues;
 import android.util.Log;
@@ -7,7 +7,6 @@ import com.google.gson.Gson;
 
 import java.lang.reflect.Type;
 
-import rx.functions.Func0;
 import rx.functions.Func1;
 
 /**

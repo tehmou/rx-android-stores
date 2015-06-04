@@ -1,11 +1,9 @@
-package com.tehmou.rxandroidarchitecture.contract;
+package com.tehmou.rxandroidstores.contract;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 
-import rx.functions.Func0;
 import rx.functions.Func1;
 
 /**

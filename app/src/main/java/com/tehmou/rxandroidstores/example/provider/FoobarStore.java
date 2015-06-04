@@ -1,10 +1,10 @@
-package com.tehmou.bettercontentprovider.example.provider;
+package com.tehmou.rxandroidstores.example.provider;
 
 import android.content.ContentResolver;
 import android.net.Uri;
 
-import com.tehmou.bettercontentprovider.example.pojo.Foobar;
-import com.tehmou.rxandroidarchitecture.store.ContentProviderStoreBase;
+import com.tehmou.rxandroidstores.example.pojo.Foobar;
+import com.tehmou.rxandroidstores.store.ContentProviderStoreBase;
 
 /**
  * Created by ttuo on 04/06/15.
