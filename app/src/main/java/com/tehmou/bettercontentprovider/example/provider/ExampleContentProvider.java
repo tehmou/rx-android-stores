@@ -1,7 +1,9 @@
 package com.tehmou.bettercontentprovider.example.provider;
 
+import android.content.ContentValues;
 import android.net.Uri;
 
+import com.tehmou.bettercontentprovider.example.pojo.Foobar;
 import com.tehmou.rxandroidarchitecture.contract.DatabaseContract;
 import com.tehmou.rxandroidarchitecture.contract.SerializedJsonContract;
 import com.tehmou.rxandroidarchitecture.provider.ContractContentProviderBase;
@@ -18,15 +20,23 @@ public class ExampleContentProvider extends ContractContentProviderBase {
     private static final int DATABASE_VERSION = 1;
 
     public ExampleContentProvider() {
-        DatabaseContract<String> contract =
-                SerializedJsonContract.<String>createBuilder("foobars", String.class)
-                        .build();
+        DatabaseContract<Foobar> contract = createFoobarContract();
         addDatabaseContract(contract);
         addDatabaseRoute(
                 new DatabaseRouteBase.Builder(contract)
                         .setMimeType("vnd.android.cursor.item/vnd.tehmou.android.bettercontentprovider.foobar")
                         .setPath(contract.getTableName() + "/*")
                         .build());
+    }
+
+    public static DatabaseContract<Foobar> createFoobarContract() {
+        return SerializedJsonContract.<Foobar>createBuilder(
+                "foobars", "INTEGER", Foobar.class, value -> {
+                    ContentValues contentValues = new ContentValues();
+                    contentValues.put(SerializedJsonContract.ID, value.getId());
+                    return contentValues;
+                })
+                .build();
     }
 
     @Override
@@ -43,4 +53,6 @@ public class ExampleContentProvider extends ContractContentProviderBase {
     protected int getDatabaseVersion() {
         return DATABASE_VERSION;
     }
+
+
 }

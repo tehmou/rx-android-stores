@@ -27,17 +27,17 @@ import rx.subjects.Subject;
 abstract public class ContentProviderStoreBase<T, U> {
     private static final String TAG = ContentProviderStoreBase.class.getSimpleName();
 
-    final protected ContentResolver contentResolver;
-    final private ConcurrentMap<Uri, Subject<T, T>> subjectMap = new ConcurrentHashMap<>();
-    final private DatabaseContract<T> databaseContract;
-    final private ContentObserver contentObserver = getContentObserver();
+    protected final ContentResolver contentResolver;
+    private final ConcurrentMap<Uri, Subject<U, U>> subjectMap = new ConcurrentHashMap<>();
+    protected final DatabaseContract<U> databaseContract;
+    private final ContentObserver contentObserver = getContentObserver();
 
     public ContentProviderStoreBase(ContentResolver contentResolver,
-                                    DatabaseContract<T> databaseContract) {
+                                    DatabaseContract<U> databaseContract) {
         this.contentResolver = contentResolver;
         this.databaseContract = databaseContract;
         this.contentResolver.registerContentObserver(
-                getContentUri(), true, contentObserver);
+                getContentUriBase(), true, contentObserver);
     }
 
     @NonNull
@@ -62,14 +62,14 @@ abstract public class ContentProviderStoreBase<T, U> {
         return new Handler(handlerThread.getLooper());
     }
 
-    public void put(T item) {
+    public void put(U item) {
         insertOrUpdate(item);
     }
 
-    public Observable<T> getStream(U id) {
+    public Observable<U> getStream(T id) {
         Log.v(TAG, "getStream(" + id + ")");
-        final T item = query(id);
-        final Observable<T> observable = lazyGetSubject(id);
+        final U item = query(id);
+        final Observable<U> observable = lazyGetSubject(id);
         if (item != null) {
             Log.v(TAG, "Found existing item for id=" + id);
             return observable.startWith(item);
@@ -77,14 +77,14 @@ abstract public class ContentProviderStoreBase<T, U> {
         return observable;
     }
 
-    private Observable<T> lazyGetSubject(U id) {
+    private Observable<U> lazyGetSubject(T id) {
         Log.v(TAG, "lazyGetSubject(" + id + ")");
         final Uri uri = getUriForKey(id);
-        subjectMap.putIfAbsent(uri, PublishSubject.<T>create());
+        subjectMap.putIfAbsent(uri, PublishSubject.<U>create());
         return subjectMap.get(uri);
     }
 
-    public void insertOrUpdate(T item) {
+    public void insertOrUpdate(U item) {
         Uri uri = getUriForKey(getIdFor(item));
         Log.v(TAG, "insertOrUpdate to " + uri);
         ContentValues values = getContentValuesForItem(item);
@@ -97,19 +97,19 @@ abstract public class ContentProviderStoreBase<T, U> {
         }
     }
 
-    protected T query(U id) {
+    protected U query(T id) {
         return query(getUriForKey(id));
     }
 
-    protected T query(Uri uri) {
-        List<T> list = queryList(uri);
+    protected U query(Uri uri) {
+        List<U> list = queryList(uri);
         return list.size() > 0 ? list.get(0) : null;
     }
 
-    protected List<T> queryList(Uri uri) {
+    protected List<U> queryList(Uri uri) {
         Cursor cursor = contentResolver.query(uri,
                 databaseContract.getProjection(), null, null, null);
-        List<T> list = new ArrayList<>();
+        List<U> list = new ArrayList<>();
 
         if (cursor != null) {
             if (cursor.moveToFirst()) {
@@ -126,14 +126,15 @@ abstract public class ContentProviderStoreBase<T, U> {
         return list;
     }
 
-    protected ContentValues getContentValuesForItem(T item) {
+    protected ContentValues getContentValuesForItem(U item) {
         return databaseContract.getContentValuesForItem(item);
     }
 
-    public Uri getUriForKey(U id) {
-        return Uri.withAppendedPath(getContentUri(), id.toString());
+    public Uri getUriForKey(T id) {
+        return Uri.withAppendedPath(getContentUriBase(), id.toString());
     }
 
-    abstract protected U getIdFor(T item);
-    abstract protected Uri getContentUri();
+    abstract protected Uri getContentUriBase();
+
+    abstract protected T getIdFor(U item);
 }

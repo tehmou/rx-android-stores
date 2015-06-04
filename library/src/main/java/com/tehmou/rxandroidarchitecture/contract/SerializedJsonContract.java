@@ -1,10 +1,14 @@
 package com.tehmou.rxandroidarchitecture.contract;
 
+import android.content.ContentValues;
 import android.util.Log;
 
 import com.google.gson.Gson;
 
 import java.lang.reflect.Type;
+
+import rx.functions.Func0;
+import rx.functions.Func1;
 
 /**
  * Created by ttuo on 13/01/15.
@@ -30,13 +34,9 @@ abstract public class SerializedJsonContract {
     }
 
     public static <T> DatabaseContractBase.Builder<T> createBuilder(final String tableName,
-                                                                    final Type type) {
-        return createBuilder(tableName, "INTEGER", type);
-    }
-
-    public static <T> DatabaseContractBase.Builder<T> createBuilder(final String tableName,
-                                                                    final String idColumnType,
-                                                                    final Type type) {
+                                                                          final String idColumnType,
+                                                                          final Type type,
+                                                                          final Func1<T, ContentValues> createContentValues) {
         Log.v(TAG, "createBuilder(" + tableName + ", " + idColumnType + ", " + type);
         return new DatabaseContractBase.Builder<T>()
                 .setTableName(tableName)
@@ -48,6 +48,11 @@ abstract public class SerializedJsonContract {
                 .setReadFunc(cursor -> {
                     final String json = cursor.getString(cursor.getColumnIndex(JSON));
                     return new Gson().fromJson(json, type);
+                })
+                .setGetContentValuesForItemFunc(value -> {
+                    ContentValues contentValues = createContentValues.call(value);
+                    contentValues.put(SerializedJsonContract.JSON, new Gson().toJson(value, type));
+                    return contentValues;
                 });
     }
 }
