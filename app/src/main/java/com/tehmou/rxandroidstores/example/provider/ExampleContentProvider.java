@@ -50,6 +50,4 @@ public class ExampleContentProvider extends ContractContentProviderBase {
     protected int getDatabaseVersion() {
         return DATABASE_VERSION;
     }
-
-
 }
