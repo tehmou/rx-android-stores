@@ -1,9 +1,17 @@
 rx-android-stores
 =================
 
-With this utility you can define an entire Android ContentProvider in one file with less than 100 lines. It also includes an RxJava wrapper, a Store.
+With this utility you can define an entire Android ContentProvider in one file with less than 100 lines. It also includes an RxJava wrapper, a Store. The definition of a ContentProvider is split into two parts: DatabaseContracts and DatabaseRoutes.
 
-It has some limitation for declaring exotic tables in a beautiful way, but overall it is extremely flexible.
+
+#### Contract
+
+Defines a table structure
+
+
+#### Route
+
+Maintains a URI pattern and queries the tables based on it
 
 
 Using the library
