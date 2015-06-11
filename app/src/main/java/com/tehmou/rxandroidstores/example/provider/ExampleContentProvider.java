@@ -8,7 +8,6 @@ import com.google.gson.Gson;
 import com.tehmou.rxandroidstores.contract.DatabaseContractBase;
 import com.tehmou.rxandroidstores.example.pojo.Foobar;
 import com.tehmou.rxandroidstores.contract.DatabaseContract;
-import com.tehmou.rxandroidstores.contract.SerializedJsonContract;
 import com.tehmou.rxandroidstores.example.pojo.Foobar2;
 import com.tehmou.rxandroidstores.provider.ContractContentProviderBase;
 import com.tehmou.rxandroidstores.route.DatabaseRouteBase;
@@ -23,7 +22,7 @@ public class ExampleContentProvider extends ContractContentProviderBase {
 
     public static final String PROVIDER_NAME = "com.tehmou.rxandroidstores.example.provider.ExampleContentProvider";
     private static final String DATABASE_NAME = "database";
-    private static final int DATABASE_VERSION = 6;
+    private static final int DATABASE_VERSION = 7;
 
     public ExampleContentProvider() {
         DatabaseContract<Foobar> foobarContract = createFoobarContract();
@@ -33,6 +32,7 @@ public class ExampleContentProvider extends ContractContentProviderBase {
                 new DatabaseRouteBase.Builder(foobarContract)
                         .setMimeType("vnd.android.cursor.item/vnd.tehmou.android.rxandroidstores.foobar")
                         .setPath(foobarContract.getTableName() + "/*")
+                        .setGetWhereFunc(uri -> "id = " + uri.getLastPathSegment())
                         .build());
 
 
@@ -76,10 +76,19 @@ public class ExampleContentProvider extends ContractContentProviderBase {
     }
 
     public static DatabaseContract<Foobar> createFoobarContract() {
-        return SerializedJsonContract.<Foobar>createBuilder(
-                "foobars", "INTEGER", Foobar.class, value -> {
+        return new DatabaseContractBase.Builder<Foobar>()
+                .setTableName("foobars")
+                .setProjection(new String[]{"id","json"})
+                .setCreateTableSql("CREATE TABLE foobars (id INTEGER, json TEXT NOT NULL)")
+                .setDropTableSql("DROP TABLE IF EXISTS foobars")
+                .setReadFunc(cursor -> {
+                    final String json = cursor.getString(cursor.getColumnIndex("json"));
+                    return new Gson().fromJson(json, Foobar.class);
+                })
+                .setGetContentValuesForItemFunc(foobar -> {
                     ContentValues contentValues = new ContentValues();
-                    contentValues.put(SerializedJsonContract.ID, value.getId());
+                    contentValues.put("id", foobar.getId());
+                    contentValues.put("json", new Gson().toJson(foobar));
                     return contentValues;
                 })
                 .build();
