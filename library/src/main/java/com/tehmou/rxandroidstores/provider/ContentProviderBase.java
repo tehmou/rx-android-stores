@@ -19,7 +19,8 @@ abstract public class ContentProviderBase extends ContentProvider {
     private static final String TAG = ContentProviderBase.class.getSimpleName();
     protected SQLiteDatabase db;
     protected SQLiteOpenHelper databaseHelper;
-    protected UriMatcher URI_MATCHER_IO;
+    protected UriMatcher URI_MATCHER_INSERT;
+    protected UriMatcher URI_MATCHER_DELETE;
     protected UriMatcher URI_MATCHER_QUERY;
 
     @Override
@@ -36,9 +37,9 @@ abstract public class ContentProviderBase extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        final int match = getUriMatchIO(uri);
-        String tableName = getTableNameIO(match);
-        String where = getWhereIO(match, uri);
+        final int match = getUriMatchDelete(uri);
+        String tableName = getTableNameDelete(match);
+        String where = getWhereDelete(match, uri);
         int count = db.delete(tableName, where, selectionArgs);
         if (count > 0) {
             notifyChange(match, uri);
@@ -49,11 +50,11 @@ abstract public class ContentProviderBase extends ContentProvider {
     @Override
     public Uri insert(Uri uri, ContentValues values) {
         SQLiteDatabase db = databaseHelper.getWritableDatabase();
-        final int match = getUriMatchIO(uri);
-        String tableName = getTableNameIO(match);
+        final int match = getUriMatchInsert(uri);
+        String tableName = getTableNameInsert(match);
         db.insertWithOnConflict(tableName,
                 null, values, SQLiteDatabase.CONFLICT_REPLACE);
-        notifyChange(match, uri);
+        notifyChange(match, values, uri);
         return uri;
     }
 
@@ -96,21 +97,29 @@ abstract public class ContentProviderBase extends ContentProvider {
         }
         SQLiteDatabase db = databaseHelper.getWritableDatabase();
 
-        final int match = getUriMatchIO(uri);
-        String tableName = getTableNameIO(match);
-        String where = getWhereIO(match, uri);
+        final int match = getUriMatchInsert(uri);
+        String tableName = getTableNameInsert(match);
+        String where = getWhereInsert(match, uri);
 
         int count = db.update(tableName, values, where, selectionArgs);
         if (count > 0) {
-            notifyChange(match, uri);
+            notifyChange(match, values, uri);
         }
         return count;
     }
 
-    private int getUriMatchIO(Uri uri) {
-        final int match = URI_MATCHER_IO.match(uri);
+    private int getUriMatchInsert(Uri uri) {
+        final int match = URI_MATCHER_INSERT.match(uri);
         if (match == -1) {
-            throw new IllegalArgumentException("Unknown IO URI: " + uri);
+            throw new IllegalArgumentException("Unknown insert URI: " + uri);
+        }
+        return match;
+    }
+
+    private int getUriMatchDelete(Uri uri) {
+        final int match = URI_MATCHER_DELETE.match(uri);
+        if (match == -1) {
+            throw new IllegalArgumentException("Unknown delete URI: " + uri);
         }
         return match;
     }
@@ -123,17 +132,22 @@ abstract public class ContentProviderBase extends ContentProvider {
         return match;
     }
 
-    protected abstract String getWhereIO(final int match, Uri uri);
+    protected abstract String getWhereInsert(final int match, Uri uri);
+    protected abstract String getWhereDelete(final int match, Uri uri);
     protected abstract String getWhereQuery(final int match, Uri uri);
 
-    protected abstract String getTableNameIO(final int match);
+    protected abstract String getTableNameInsert(final int match);
+    protected abstract String getTableNameDelete(final int match);
     protected abstract String getTableNameQuery(final int match);
 
     // Only for query operations
     protected abstract String getDefaultSortOrderQuery(final int match);
 
-    // Only for IO operations
+    // Only for insert / update operations
     protected abstract void notifyChange(final int match, Uri uri);
+
+    // Only for delete operations
+    protected abstract void notifyChange(final int match, ContentValues contentValues, Uri uri);
 
     protected abstract SQLiteOpenHelper createDatabaseHelper(final Context context);
     protected abstract void createUriMatchers();

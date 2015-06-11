@@ -29,7 +29,7 @@ public class Foobar2ExampleContentProvider extends ContractContentProviderBase {
         addDatabaseContract(foobar2Contract);
 
         // Notice that the order has to be from more restrictive to less restrictive.
-        DatabaseQueryRoute idDatabaseRoute = new DatabaseRouteBase.Builder(foobar2Contract)
+        DatabaseRouteBase idDatabaseRoute = new DatabaseRouteBase.Builder(foobar2Contract)
                 .setMimeType("vnd.android.cursor.item/vnd.tehmou.android.rxandroidstores.foobar2")
                 .setPath(foobar2Contract.getTableName() + "/country/*/id/*")
                 .setGetWhereFunc(uri -> {
@@ -49,7 +49,8 @@ public class Foobar2ExampleContentProvider extends ContractContentProviderBase {
                     notifyUri.call(countryUri);
                 })
                 .build();
-        addDatabaseIORoute(idDatabaseRoute);
+        addDatabaseDeleteRoute(idDatabaseRoute);
+        addDatabaseInsertRoute(idDatabaseRoute);
         addDatabaseQueryRoute(idDatabaseRoute);
         addDatabaseQueryRoute(
                 new DatabaseRouteBase.Builder(foobar2Contract)

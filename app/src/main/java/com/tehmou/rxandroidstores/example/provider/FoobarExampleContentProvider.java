@@ -24,12 +24,13 @@ public class FoobarExampleContentProvider extends ContractContentProviderBase {
         DatabaseContract<Foobar> foobarContract = createFoobarContract();
         addDatabaseContract(foobarContract);
 
-        DatabaseQueryRoute idDatabaseRoute = new DatabaseRouteBase.Builder(foobarContract)
+        DatabaseRouteBase idDatabaseRoute = new DatabaseRouteBase.Builder(foobarContract)
                 .setMimeType("vnd.android.cursor.item/vnd.tehmou.android.rxandroidstores.foobar")
                 .setPath(foobarContract.getTableName() + "/*")
                 .setGetWhereFunc(uri -> "id = " + uri.getLastPathSegment())
                 .build();
-        addDatabaseIORoute(idDatabaseRoute);
+        addDatabaseInsertRoute(idDatabaseRoute);
+        addDatabaseDeleteRoute(idDatabaseRoute);
         addDatabaseQueryRoute(idDatabaseRoute);
     }
 

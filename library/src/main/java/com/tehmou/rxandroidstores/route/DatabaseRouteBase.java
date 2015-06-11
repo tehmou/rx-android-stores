@@ -1,23 +1,28 @@
 package com.tehmou.rxandroidstores.route;
 
+import android.content.ContentValues;
 import android.net.Uri;
 
 import com.tehmou.rxandroidstores.contract.DatabaseContract;
 
 import rx.functions.Action1;
 import rx.functions.Action2;
+import rx.functions.Action3;
 import rx.functions.Func1;
 
 /**
  * Created by ttuo on 04/05/15.
  */
-public class DatabaseRouteBase implements DatabaseQueryRoute {
+public class DatabaseRouteBase implements DatabaseQueryRoute, DatabaseInsertRoute, DatabaseDeleteRoute {
     private final String tableName;
     private final String path;
     private final String sortOrder;
     private final Func1<Uri, String> getWhereFunc;
     private final String mimeType;
-    private Action2<Uri, Action1<Uri>> notifyChangeFunc;
+    private Action3<ContentValues, Uri, Action1<Uri>> notifyChangeInsertFunc =
+            (contentValues, uri, notifyChange) -> notifyChange.call(uri);
+    private Action2<Uri, Action1<Uri>> notifyChangeFunc =
+            (uri, notifyChange) -> notifyChange.call(uri);
 
     private DatabaseRouteBase(Builder builder) {
         this.tableName = builder.tableName;
@@ -25,6 +30,7 @@ public class DatabaseRouteBase implements DatabaseQueryRoute {
         this.sortOrder = builder.sortOrder;
         this.getWhereFunc = builder.getWhereFunc;
         this.mimeType = builder.mimeType;
+        this.notifyChangeInsertFunc = builder.notifyChangeInsertFunc;
         this.notifyChangeFunc = builder.notifyChangeFunc;
     }
 
@@ -35,6 +41,15 @@ public class DatabaseRouteBase implements DatabaseQueryRoute {
 
     public void notifyChange(Uri uri, Action1<Uri> notifyChange) {
         notifyChangeFunc.call(uri, notifyChange);
+    }
+
+    @Override
+    public void notifyChange(ContentValues contentValues, Uri uri, Action1<Uri> notifyChange) {
+        if (notifyChangeInsertFunc != null) {
+            notifyChangeInsertFunc.call(contentValues, uri, notifyChange);
+        } else {
+            notifyChangeFunc.call(uri, notifyChange);
+        }
     }
 
     @Override
@@ -63,6 +78,8 @@ public class DatabaseRouteBase implements DatabaseQueryRoute {
         private String sortOrder;
         private Func1<Uri, String> getWhereFunc;
         private String mimeType;
+        private Action3<ContentValues, Uri, Action1<Uri>> notifyChangeInsertFunc =
+                (contentValues, uri, notifyChange) -> notifyChange.call(uri);
         private Action2<Uri, Action1<Uri>> notifyChangeFunc =
                 (uri, notifyChange) -> notifyChange.call(uri);
 
@@ -72,7 +89,14 @@ public class DatabaseRouteBase implements DatabaseQueryRoute {
             this.getWhereFunc = databaseContract.getDefaultWhereFunc();
         }
 
-        public Builder setNotifyChangeFunc(Action2<Uri, Action1<Uri>> notifyChangeFunc) {
+        public Builder setNotifyChangeInsertFunc(
+                Action3<ContentValues, Uri, Action1<Uri>> notifyChangeInsertFunc) {
+            this.notifyChangeInsertFunc = notifyChangeInsertFunc;
+            return this;
+        }
+
+        public Builder setNotifyChangeFunc(
+                Action2<Uri, Action1<Uri>> notifyChangeFunc) {
             this.notifyChangeFunc = notifyChangeFunc;
             return this;
         }
@@ -97,7 +121,7 @@ public class DatabaseRouteBase implements DatabaseQueryRoute {
             return this;
         }
 
-        public DatabaseQueryRoute build() {
+        public DatabaseRouteBase build() {
             return new DatabaseRouteBase(this);
         }
     }
