@@ -24,6 +24,7 @@ abstract public class ContractContentProviderBase extends ContentProviderBase {
     private static final String TAG = ContractContentProviderBase.class.getSimpleName();
     private final List<DatabaseContract> databaseContracts = new ArrayList<>();
     private final List<DatabaseInsertRoute> databaseInsertRoutes = new ArrayList<>();
+    private final List<DatabaseInsertRoute> databaseUpdateRoutes = new ArrayList<>();
     private final List<DatabaseDeleteRoute> databaseDeleteRoutes = new ArrayList<>();
     private final List<DatabaseQueryRoute> databaseQueryRoutes = new ArrayList<>();
 
@@ -35,6 +36,11 @@ abstract public class ContractContentProviderBase extends ContentProviderBase {
     protected void addDatabaseInsertRoute(DatabaseInsertRoute databaseRoute) {
         assert(databaseHelper == null);
         databaseInsertRoutes.add(databaseRoute);
+    }
+
+    protected void addDatabaseUpdateRoute(DatabaseInsertRoute databaseRoute) {
+        assert(databaseHelper == null);
+        databaseUpdateRoutes.add(databaseRoute);
     }
 
     protected void addDatabaseDeleteRoute(DatabaseDeleteRoute databaseRoute) {
@@ -88,6 +94,11 @@ abstract public class ContractContentProviderBase extends ContentProviderBase {
     }
 
     @Override
+    protected String getTableNameUpdate(int match) {
+        return getDatabaseUpdateRouteForMatch(match).getTableName();
+    }
+
+    @Override
     protected String getTableNameDelete(int match) {
         return getDatabaseDeleteRouteForMatch(match).getTableName();
     }
@@ -100,6 +111,11 @@ abstract public class ContractContentProviderBase extends ContentProviderBase {
     @Override
     protected String getWhereInsert(int match, Uri uri) {
         return getDatabaseInsertRouteForMatch(match).getWhere(uri);
+    }
+
+    @Override
+    protected String getWhereUpdate(int match, Uri uri) {
+        return getDatabaseUpdateRouteForMatch(match).getWhere(uri);
     }
 
     @Override
@@ -133,6 +149,7 @@ abstract public class ContractContentProviderBase extends ContentProviderBase {
     @Override
     protected void createUriMatchers() {
         URI_MATCHER_INSERT = createUriMatcher(databaseInsertRoutes);
+        URI_MATCHER_UPDATE = createUriMatcher(databaseUpdateRoutes);
         URI_MATCHER_DELETE = createUriMatcher(databaseDeleteRoutes);
         URI_MATCHER_QUERY = createUriMatcher(databaseQueryRoutes);
     }
@@ -149,6 +166,10 @@ abstract public class ContractContentProviderBase extends ContentProviderBase {
 
     protected DatabaseInsertRoute getDatabaseInsertRouteForMatch(final int match) {
         return databaseInsertRoutes.get(match);
+    }
+
+    protected DatabaseInsertRoute getDatabaseUpdateRouteForMatch(final int match) {
+        return databaseUpdateRoutes.get(match);
     }
 
     protected DatabaseDeleteRoute getDatabaseDeleteRouteForMatch(final int match) {

@@ -30,6 +30,7 @@ public class FoobarExampleContentProvider extends ContractContentProviderBase {
                 .setGetWhereFunc(uri -> "id = " + uri.getLastPathSegment())
                 .build();
         addDatabaseInsertRoute(idDatabaseRoute);
+        addDatabaseUpdateRoute(idDatabaseRoute);
         addDatabaseDeleteRoute(idDatabaseRoute);
         addDatabaseQueryRoute(idDatabaseRoute);
     }

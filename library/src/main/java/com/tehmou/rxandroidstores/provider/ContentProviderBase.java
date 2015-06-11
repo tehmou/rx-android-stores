@@ -20,6 +20,7 @@ abstract public class ContentProviderBase extends ContentProvider {
     protected SQLiteDatabase db;
     protected SQLiteOpenHelper databaseHelper;
     protected UriMatcher URI_MATCHER_INSERT;
+    protected UriMatcher URI_MATCHER_UPDATE;
     protected UriMatcher URI_MATCHER_DELETE;
     protected UriMatcher URI_MATCHER_QUERY;
 
@@ -97,9 +98,9 @@ abstract public class ContentProviderBase extends ContentProvider {
         }
         SQLiteDatabase db = databaseHelper.getWritableDatabase();
 
-        final int match = getUriMatchInsert(uri);
-        String tableName = getTableNameInsert(match);
-        String where = getWhereInsert(match, uri);
+        final int match = getUriMatchUpdate(uri);
+        String tableName = getTableNameUpdate(match);
+        String where = getWhereUpdate(match, uri);
 
         int count = db.update(tableName, values, where, selectionArgs);
         if (count > 0) {
@@ -112,6 +113,14 @@ abstract public class ContentProviderBase extends ContentProvider {
         final int match = URI_MATCHER_INSERT.match(uri);
         if (match == -1) {
             throw new IllegalArgumentException("Unknown insert URI: " + uri);
+        }
+        return match;
+    }
+
+    private int getUriMatchUpdate(Uri uri) {
+        final int match = URI_MATCHER_UPDATE.match(uri);
+        if (match == -1) {
+            throw new IllegalArgumentException("Unknown update URI: " + uri);
         }
         return match;
     }
@@ -133,10 +142,12 @@ abstract public class ContentProviderBase extends ContentProvider {
     }
 
     protected abstract String getWhereInsert(final int match, Uri uri);
+    protected abstract String getWhereUpdate(final int match, Uri uri);
     protected abstract String getWhereDelete(final int match, Uri uri);
     protected abstract String getWhereQuery(final int match, Uri uri);
 
     protected abstract String getTableNameInsert(final int match);
+    protected abstract String getTableNameUpdate(final int match);
     protected abstract String getTableNameDelete(final int match);
     protected abstract String getTableNameQuery(final int match);
 

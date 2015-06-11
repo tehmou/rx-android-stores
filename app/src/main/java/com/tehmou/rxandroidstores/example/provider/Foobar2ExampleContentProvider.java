@@ -51,6 +51,7 @@ public class Foobar2ExampleContentProvider extends ContractContentProviderBase {
                 .build();
         addDatabaseDeleteRoute(idDatabaseRoute);
         addDatabaseInsertRoute(idDatabaseRoute);
+        addDatabaseUpdateRoute(idDatabaseRoute);
         addDatabaseQueryRoute(idDatabaseRoute);
         addDatabaseQueryRoute(
                 new DatabaseRouteBase.Builder(foobar2Contract)
