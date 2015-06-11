@@ -12,7 +12,7 @@ import rx.functions.Func1;
 /**
  * Created by ttuo on 13/01/15.
  */
-abstract public class SerializedJsonContract {
+public abstract class SerializedJsonContract {
     private static final String TAG = SerializedJsonContract.class.getSimpleName();
 
     public static final String ID = "id";

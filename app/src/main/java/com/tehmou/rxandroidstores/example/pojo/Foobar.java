@@ -7,7 +7,8 @@ public class Foobar {
     private final int id;
     private final String value;
 
-    public Foobar(int id, String value) {
+    public Foobar(int id,
+                  String value) {
         this.id = id;
         this.value = value;
     }

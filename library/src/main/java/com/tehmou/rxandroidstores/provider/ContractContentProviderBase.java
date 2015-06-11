@@ -5,6 +5,7 @@ import android.content.UriMatcher;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
+import android.util.Log;
 
 import com.tehmou.rxandroidstores.contract.DatabaseContract;
 import com.tehmou.rxandroidstores.route.DatabaseRoute;
@@ -16,6 +17,7 @@ import java.util.List;
  * Created by ttuo on 10/01/15.
  */
 abstract public class ContractContentProviderBase extends ContentProviderBase {
+    private static final String TAG = ContractContentProviderBase.class.getSimpleName();
     private final List<DatabaseContract> databaseContracts = new ArrayList<>();
     private final List<DatabaseRoute> databaseRoutes = new ArrayList<>();
 
@@ -42,17 +44,25 @@ abstract public class ContractContentProviderBase extends ContentProviderBase {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            for (DatabaseContract databaseContract : databaseContracts) {
-                db.execSQL(databaseContract.getCreateTable());
-            }
+            Log.v(TAG, "onCreate");
+            createTables(db);
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            Log.v(TAG, "onUpgrade");
             for (DatabaseContract databaseContract : databaseContracts) {
+                Log.v(TAG, "dropTable(" + databaseContract.getTableName() + ")");
                 db.execSQL(databaseContract.getDropTable());
             }
-            onCreate(db);
+            createTables(db);
+        }
+
+        private void createTables(SQLiteDatabase db) {
+            for (DatabaseContract databaseContract : databaseContracts) {
+                Log.v(TAG, "createTable(" + databaseContract.getTableName() + ")");
+                db.execSQL(databaseContract.getCreateTable());
+            }
         }
     }
 
@@ -88,6 +98,7 @@ abstract public class ContractContentProviderBase extends ContentProviderBase {
         URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
         int i = 0;
         for (DatabaseRoute databaseRoute : databaseRoutes) {
+            Log.v(TAG, "Add uri pattern " + getProviderName() + "/" + databaseRoute.getPath());
             URI_MATCHER.addURI(getProviderName(), databaseRoute.getPath(), i++);
         }
     }

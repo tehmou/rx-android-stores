@@ -5,12 +5,13 @@ import android.net.Uri;
 
 import com.tehmou.rxandroidstores.example.pojo.Foobar;
 import com.tehmou.rxandroidstores.store.ContentProviderStoreBase;
+import com.tehmou.rxandroidstores.store.SingleItemContentProviderStoreBase;
 
 /**
  * Created by ttuo on 04/06/15.
  */
-public class FoobarStore extends ContentProviderStoreBase<Integer, Foobar> {
-    public FoobarStore(ContentResolver contentResolver) {
+public class FoobarIdStore extends SingleItemContentProviderStoreBase<Integer, Foobar> {
+    public FoobarIdStore(ContentResolver contentResolver) {
         super(contentResolver, ExampleContentProvider.createFoobarContract());
     }
 

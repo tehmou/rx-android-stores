@@ -7,8 +7,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.tehmou.bettercontentprovider.R;
+import com.tehmou.rxandroidstores.example.pojo.CountryIdKey;
 import com.tehmou.rxandroidstores.example.pojo.Foobar;
-import com.tehmou.rxandroidstores.example.provider.FoobarStore;
+import com.tehmou.rxandroidstores.example.pojo.Foobar2;
+import com.tehmou.rxandroidstores.example.provider.Foobar2ByCountryStore;
+import com.tehmou.rxandroidstores.example.provider.Foobar2IdStore;
+import com.tehmou.rxandroidstores.example.provider.FoobarIdStore;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -21,11 +25,21 @@ public class MainActivity extends ActionBarActivity {
 
         Log.d(TAG, "onCreate");
 
-        FoobarStore store = new FoobarStore(getContentResolver());
+        // Foobar stores
+        FoobarIdStore foobarIdStore = new FoobarIdStore(getContentResolver());
+        foobarIdStore.getStream(1234)
+                .subscribe(foobar -> Log.d(TAG, "Foobar: " + foobar.getValue()));
+        foobarIdStore.put(new Foobar(1234, "Success"));
 
-        store.getStream(1234)
-                .subscribe(foobar -> Log.d(TAG, "value: " + foobar.getValue()));
-        store.put(new Foobar(1234, "My Text"));
+
+        // Foobar2 stores
+        Foobar2IdStore foobar2IdStore = new Foobar2IdStore(getContentResolver());
+        Foobar2ByCountryStore countryStore = new Foobar2ByCountryStore(getContentResolver());
+        countryStore.getStream("FIN")
+                .subscribe(foobarList -> Log.d(TAG, "Foobar2 list: " + foobarList.size()));
+        foobar2IdStore.getStream(new CountryIdKey("FIN", 1234))
+                .subscribe(foobar -> Log.d(TAG, "Foobar2: " + foobar.getValue()));
+        foobar2IdStore.put(new Foobar2(1234, "FIN", 100, "Success"));
     }
 
     @Override
