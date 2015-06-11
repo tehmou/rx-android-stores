@@ -11,7 +11,7 @@ import rx.functions.Func1;
 /**
  * Created by ttuo on 04/05/15.
  */
-public class DatabaseRouteBase implements DatabaseRoute {
+public class DatabaseRouteBase implements DatabaseQueryRoute {
     private final String tableName;
     private final String path;
     private final String sortOrder;
@@ -97,7 +97,7 @@ public class DatabaseRouteBase implements DatabaseRoute {
             return this;
         }
 
-        public DatabaseRoute build() {
+        public DatabaseQueryRoute build() {
             return new DatabaseRouteBase(this);
         }
     }

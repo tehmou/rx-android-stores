@@ -5,13 +5,13 @@ import android.net.Uri;
 import rx.functions.Action1;
 
 /**
- * Created by ttuo on 04/05/15.
+ * Created by ttuo on 11/06/15.
  */
 public interface DatabaseRoute {
     String getPath();
     String getTableName();
-    String getSortOrder();
     String getWhere(Uri uri);
-    String getMimeType();
+
+    // This is not allowed for query routes, but Java does not support polymorphism..
     void notifyChange(Uri uri, Action1<Uri> notifyChange);
 }

@@ -19,11 +19,12 @@ abstract public class ContentProviderBase extends ContentProvider {
     private static final String TAG = ContentProviderBase.class.getSimpleName();
     protected SQLiteDatabase db;
     protected SQLiteOpenHelper databaseHelper;
-    protected UriMatcher URI_MATCHER;
+    protected UriMatcher URI_MATCHER_IO;
+    protected UriMatcher URI_MATCHER_QUERY;
 
     @Override
     public boolean onCreate() {
-        createUriMatcher();
+        createUriMatchers();
         Context context = getContext();
         databaseHelper = createDatabaseHelper(context);
         db = databaseHelper.getWritableDatabase();
@@ -35,9 +36,9 @@ abstract public class ContentProviderBase extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        final int match = getUriMatch(uri);
-        String tableName = getTableName(match);
-        String where = getWhere(match, uri);
+        final int match = getUriMatchIO(uri);
+        String tableName = getTableNameIO(match);
+        String where = getWhereIO(match, uri);
         int count = db.delete(tableName, where, selectionArgs);
         if (count > 0) {
             notifyChange(match, uri);
@@ -48,8 +49,8 @@ abstract public class ContentProviderBase extends ContentProvider {
     @Override
     public Uri insert(Uri uri, ContentValues values) {
         SQLiteDatabase db = databaseHelper.getWritableDatabase();
-        final int match = getUriMatch(uri);
-        String tableName = getTableName(match);
+        final int match = getUriMatchIO(uri);
+        String tableName = getTableNameIO(match);
         db.insertWithOnConflict(tableName,
                 null, values, SQLiteDatabase.CONFLICT_REPLACE);
         notifyChange(match, uri);
@@ -62,12 +63,12 @@ abstract public class ContentProviderBase extends ContentProvider {
                         String sortOrder) {
         SQLiteDatabase db = databaseHelper.getReadableDatabase();
         SQLiteQueryBuilder builder = new SQLiteQueryBuilder();
-        final int match = getUriMatch(uri);
-        String tableName = getTableName(match);
-        String where = getWhere(match, uri);
+        final int match = getUriMatchQuery(uri);
+        String tableName = getTableNameQuery(match);
+        String where = getWhereQuery(match, uri);
 
         if (TextUtils.isEmpty(sortOrder)) {
-            sortOrder = getDefaultSortOrder(match);
+            sortOrder = getDefaultSortOrderQuery(match);
         }
 
         builder.setTables(tableName);
@@ -95,9 +96,9 @@ abstract public class ContentProviderBase extends ContentProvider {
         }
         SQLiteDatabase db = databaseHelper.getWritableDatabase();
 
-        final int match = getUriMatch(uri);
-        String tableName = getTableName(match);
-        String where = getWhere(match, uri);
+        final int match = getUriMatchIO(uri);
+        String tableName = getTableNameIO(match);
+        String where = getWhereIO(match, uri);
 
         int count = db.update(tableName, values, where, selectionArgs);
         if (count > 0) {
@@ -106,18 +107,34 @@ abstract public class ContentProviderBase extends ContentProvider {
         return count;
     }
 
-    private int getUriMatch(Uri uri) {
-        final int match = URI_MATCHER.match(uri);
+    private int getUriMatchIO(Uri uri) {
+        final int match = URI_MATCHER_IO.match(uri);
         if (match == -1) {
-            throw new IllegalArgumentException("Unknown URI: " + uri);
+            throw new IllegalArgumentException("Unknown IO URI: " + uri);
         }
         return match;
     }
 
-    protected abstract String getWhere(final int match, Uri uri);
-    protected abstract String getTableName(final int match);
-    protected abstract String getDefaultSortOrder(final int match);
-    protected abstract SQLiteOpenHelper createDatabaseHelper(final Context context);
-    protected abstract void createUriMatcher();
+    private int getUriMatchQuery(Uri uri) {
+        final int match = URI_MATCHER_QUERY.match(uri);
+        if (match == -1) {
+            throw new IllegalArgumentException("Unknown Query URI: " + uri);
+        }
+        return match;
+    }
+
+    protected abstract String getWhereIO(final int match, Uri uri);
+    protected abstract String getWhereQuery(final int match, Uri uri);
+
+    protected abstract String getTableNameIO(final int match);
+    protected abstract String getTableNameQuery(final int match);
+
+    // Only for query operations
+    protected abstract String getDefaultSortOrderQuery(final int match);
+
+    // Only for IO operations
     protected abstract void notifyChange(final int match, Uri uri);
+
+    protected abstract SQLiteOpenHelper createDatabaseHelper(final Context context);
+    protected abstract void createUriMatchers();
 }

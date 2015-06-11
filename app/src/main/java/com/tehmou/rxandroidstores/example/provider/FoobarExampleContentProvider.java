@@ -7,6 +7,7 @@ import com.tehmou.rxandroidstores.contract.DatabaseContract;
 import com.tehmou.rxandroidstores.contract.DatabaseContractBase;
 import com.tehmou.rxandroidstores.example.pojo.Foobar;
 import com.tehmou.rxandroidstores.provider.ContractContentProviderBase;
+import com.tehmou.rxandroidstores.route.DatabaseQueryRoute;
 import com.tehmou.rxandroidstores.route.DatabaseRouteBase;
 
 /**
@@ -23,12 +24,13 @@ public class FoobarExampleContentProvider extends ContractContentProviderBase {
         DatabaseContract<Foobar> foobarContract = createFoobarContract();
         addDatabaseContract(foobarContract);
 
-        addDatabaseRoute(
-                new DatabaseRouteBase.Builder(foobarContract)
-                        .setMimeType("vnd.android.cursor.item/vnd.tehmou.android.rxandroidstores.foobar")
-                        .setPath(foobarContract.getTableName() + "/*")
-                        .setGetWhereFunc(uri -> "id = " + uri.getLastPathSegment())
-                        .build());
+        DatabaseQueryRoute idDatabaseRoute = new DatabaseRouteBase.Builder(foobarContract)
+                .setMimeType("vnd.android.cursor.item/vnd.tehmou.android.rxandroidstores.foobar")
+                .setPath(foobarContract.getTableName() + "/*")
+                .setGetWhereFunc(uri -> "id = " + uri.getLastPathSegment())
+                .build();
+        addDatabaseIORoute(idDatabaseRoute);
+        addDatabaseQueryRoute(idDatabaseRoute);
     }
 
     public static DatabaseContract<Foobar> createFoobarContract() {

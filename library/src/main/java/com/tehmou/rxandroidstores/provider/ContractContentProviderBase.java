@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.tehmou.rxandroidstores.contract.DatabaseContract;
+import com.tehmou.rxandroidstores.route.DatabaseQueryRoute;
 import com.tehmou.rxandroidstores.route.DatabaseRoute;
 
 import java.util.ArrayList;
@@ -19,16 +20,22 @@ import java.util.List;
 abstract public class ContractContentProviderBase extends ContentProviderBase {
     private static final String TAG = ContractContentProviderBase.class.getSimpleName();
     private final List<DatabaseContract> databaseContracts = new ArrayList<>();
-    private final List<DatabaseRoute> databaseRoutes = new ArrayList<>();
+    private final List<DatabaseRoute> databaseIORoutes = new ArrayList<>();
+    private final List<DatabaseQueryRoute> databaseQueryRoutes = new ArrayList<>();
 
     protected void addDatabaseContract(DatabaseContract databaseContract) {
         assert(databaseHelper == null);
         databaseContracts.add(databaseContract);
     }
 
-    protected void addDatabaseRoute(DatabaseRoute databaseRoute) {
+    protected void addDatabaseIORoute(DatabaseQueryRoute databaseRoute) {
         assert(databaseHelper == null);
-        databaseRoutes.add(databaseRoute);
+        databaseIORoutes.add(databaseRoute);
+    }
+
+    protected void addDatabaseQueryRoute(DatabaseQueryRoute databaseRoute) {
+        assert(databaseHelper == null);
+        databaseQueryRoutes.add(databaseRoute);
     }
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
@@ -67,24 +74,35 @@ abstract public class ContractContentProviderBase extends ContentProviderBase {
     }
 
     @Override
-    protected String getDefaultSortOrder(int match) {
-        return getDatabaseRouteForMatch(match).getSortOrder();
+    protected String getTableNameIO(int match) {
+        return getDatabaseIORouteForMatch(match).getTableName();
     }
 
     @Override
-    protected String getTableName(int match) {
-        return getDatabaseRouteForMatch(match).getTableName();
+    protected String getTableNameQuery(int match) {
+        return getDatabaseQueryRouteForMatch(match).getTableName();
     }
 
     @Override
-    protected String getWhere(int match, Uri uri) {
-        return getDatabaseRouteForMatch(match).getWhere(uri);
+    protected String getWhereIO(int match, Uri uri) {
+        return getDatabaseIORouteForMatch(match).getWhere(uri);
+    }
+
+    @Override
+    protected String getWhereQuery(int match, Uri uri) {
+        return getDatabaseQueryRouteForMatch(match).getWhere(uri);
+    }
+
+    @Override
+    protected String getDefaultSortOrderQuery(int match) {
+        return getDatabaseQueryRouteForMatch(match).getSortOrder();
     }
 
     @Override
     public String getType(Uri uri) {
-        final int match = URI_MATCHER.match(uri);
-        return getDatabaseRouteForMatch(match).getMimeType();
+        // We assume the query uri makes sense here
+        final int match = URI_MATCHER_QUERY.match(uri);
+        return getDatabaseQueryRouteForMatch(match).getMimeType();
     }
 
     @Override
@@ -94,22 +112,32 @@ abstract public class ContractContentProviderBase extends ContentProviderBase {
     }
 
     @Override
-    protected void createUriMatcher() {
-        URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
+    protected void createUriMatchers() {
+        URI_MATCHER_QUERY = createUriMatcher(databaseQueryRoutes);
+        URI_MATCHER_IO = createUriMatcher(databaseIORoutes);
+    }
+
+    protected UriMatcher createUriMatcher(List<? extends DatabaseRoute> databaseRoutes) {
+        UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         int i = 0;
         for (DatabaseRoute databaseRoute : databaseRoutes) {
             Log.v(TAG, "Add uri pattern " + getProviderName() + "/" + databaseRoute.getPath());
-            URI_MATCHER.addURI(getProviderName(), databaseRoute.getPath(), i++);
+            uriMatcher.addURI(getProviderName(), databaseRoute.getPath(), i++);
         }
+        return uriMatcher;
     }
 
-    protected DatabaseRoute getDatabaseRouteForMatch(final int match) {
-        return databaseRoutes.get(match);
+    protected DatabaseRoute getDatabaseIORouteForMatch(final int match) {
+        return databaseIORoutes.get(match);
+    }
+
+    protected DatabaseQueryRoute getDatabaseQueryRouteForMatch(final int match) {
+        return databaseQueryRoutes.get(match);
     }
 
     @Override
     protected void notifyChange(int match, Uri uri) {
-        getDatabaseRouteForMatch(match).notifyChange(uri,
+        getDatabaseIORouteForMatch(match).notifyChange(uri,
                 (value) -> getContext().getContentResolver().notifyChange(value, null));
     }
 

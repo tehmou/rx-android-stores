@@ -9,6 +9,7 @@ import com.tehmou.rxandroidstores.contract.DatabaseContract;
 import com.tehmou.rxandroidstores.contract.DatabaseContractBase;
 import com.tehmou.rxandroidstores.example.pojo.Foobar2;
 import com.tehmou.rxandroidstores.provider.ContractContentProviderBase;
+import com.tehmou.rxandroidstores.route.DatabaseQueryRoute;
 import com.tehmou.rxandroidstores.route.DatabaseRouteBase;
 
 import java.util.List;
@@ -28,34 +29,35 @@ public class Foobar2ExampleContentProvider extends ContractContentProviderBase {
         addDatabaseContract(foobar2Contract);
 
         // Notice that the order has to be from more restrictive to less restrictive.
-        addDatabaseRoute(
-                new DatabaseRouteBase.Builder(foobar2Contract)
-                        .setMimeType("vnd.android.cursor.item/vnd.tehmou.android.rxandroidstores.foobar2")
-                        .setPath(foobar2Contract.getTableName() + "/country/*/id/*")
-                        .setGetWhereFunc(uri -> {
-                            final List<String> pathSegments = uri.getPathSegments();
-                            final String country = pathSegments.get(pathSegments.size() - 3);
-                            final String id = pathSegments.get(pathSegments.size() - 1);
-                            return "country = '" + country + "' AND id = " + id;
-                        })
-                        .setNotifyChangeFunc((uri, notifyUri) -> {
-                            notifyUri.call(uri);
-                            Uri countryUri = Uri.EMPTY;
-                            final List<String> pathSegments = uri.getPathSegments();
-                            for (int i = 0; i < pathSegments.size() - 3; i++) {
-                                countryUri = Uri.withAppendedPath(countryUri, pathSegments.get(i));
-                            }
-                            Log.v(TAG, "Notifying country uri " + countryUri);
-                            notifyUri.call(countryUri);
-                        })
-                        .build());
-        addDatabaseRoute(
+        DatabaseQueryRoute idDatabaseRoute = new DatabaseRouteBase.Builder(foobar2Contract)
+                .setMimeType("vnd.android.cursor.item/vnd.tehmou.android.rxandroidstores.foobar2")
+                .setPath(foobar2Contract.getTableName() + "/country/*/id/*")
+                .setGetWhereFunc(uri -> {
+                    final List<String> pathSegments = uri.getPathSegments();
+                    final String country = pathSegments.get(pathSegments.size() - 3);
+                    final String id = pathSegments.get(pathSegments.size() - 1);
+                    return "country = '" + country + "' AND id = " + id;
+                })
+                .setNotifyChangeFunc((uri, notifyUri) -> {
+                    notifyUri.call(uri);
+                    Uri countryUri = Uri.EMPTY;
+                    final List<String> pathSegments = uri.getPathSegments();
+                    for (int i = 0; i < pathSegments.size() - 3; i++) {
+                        countryUri = Uri.withAppendedPath(countryUri, pathSegments.get(i));
+                    }
+                    Log.v(TAG, "Notifying country uri " + countryUri);
+                    notifyUri.call(countryUri);
+                })
+                .build();
+        addDatabaseIORoute(idDatabaseRoute);
+        addDatabaseQueryRoute(idDatabaseRoute);
+        addDatabaseQueryRoute(
                 new DatabaseRouteBase.Builder(foobar2Contract)
                         .setMimeType("vnd.android.cursor.dir/vnd.tehmou.android.rxandroidstores.foobar2")
                         .setPath(foobar2Contract.getTableName() + "/country/*")
                         .setGetWhereFunc(uri -> "country = '" + uri.getLastPathSegment() + "'")
                         .build());
-        addDatabaseRoute(
+        addDatabaseQueryRoute(
                 new DatabaseRouteBase.Builder(foobar2Contract)
                         .setMimeType("vnd.android.cursor.dir/vnd.tehmou.android.rxandroidstores.foobar2")
                         .setPath(foobar2Contract.getTableName())
