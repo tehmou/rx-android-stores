@@ -3,9 +3,7 @@ package com.tehmou.rxandroidstores.example.provider;
 import android.content.ContentResolver;
 import android.net.Uri;
 
-import com.tehmou.rxandroidstores.example.pojo.Foobar;
 import com.tehmou.rxandroidstores.example.pojo.Foobar2;
-import com.tehmou.rxandroidstores.store.ContentProviderStoreBase;
 import com.tehmou.rxandroidstores.store.ListContentProviderStoreBase;
 
 /**
@@ -13,7 +11,7 @@ import com.tehmou.rxandroidstores.store.ListContentProviderStoreBase;
  */
 public class Foobar2ByCountryStore extends ListContentProviderStoreBase<String, Foobar2> {
     public Foobar2ByCountryStore(ContentResolver contentResolver) {
-        super(contentResolver, ExampleContentProvider.createFoobar2Contract());
+        super(contentResolver, Foobar2ExampleContentProvider.createFoobar2Contract());
     }
 
     @Override
@@ -23,7 +21,7 @@ public class Foobar2ByCountryStore extends ListContentProviderStoreBase<String, 
 
     @Override
     protected Uri getContentUriBase() {
-        return Uri.parse("content://" + ExampleContentProvider.PROVIDER_NAME + "/"
+        return Uri.parse("content://" + Foobar2ExampleContentProvider.PROVIDER_NAME + "/"
                 + databaseContract.getTableName()
                 + "/country");
     }

@@ -4,7 +4,6 @@ import android.content.ContentResolver;
 import android.net.Uri;
 
 import com.tehmou.rxandroidstores.example.pojo.Foobar;
-import com.tehmou.rxandroidstores.store.ContentProviderStoreBase;
 import com.tehmou.rxandroidstores.store.SingleItemContentProviderStoreBase;
 
 /**
@@ -12,7 +11,7 @@ import com.tehmou.rxandroidstores.store.SingleItemContentProviderStoreBase;
  */
 public class FoobarIdStore extends SingleItemContentProviderStoreBase<Integer, Foobar> {
     public FoobarIdStore(ContentResolver contentResolver) {
-        super(contentResolver, ExampleContentProvider.createFoobarContract());
+        super(contentResolver, FoobarExampleContentProvider.createFoobarContract());
     }
 
     @Override
@@ -22,7 +21,7 @@ public class FoobarIdStore extends SingleItemContentProviderStoreBase<Integer, F
 
     @Override
     protected Uri getContentUriBase() {
-        return Uri.parse("content://" + ExampleContentProvider.PROVIDER_NAME + "/"
+        return Uri.parse("content://" + FoobarExampleContentProvider.PROVIDER_NAME + "/"
                 + databaseContract.getTableName());
     }
 }

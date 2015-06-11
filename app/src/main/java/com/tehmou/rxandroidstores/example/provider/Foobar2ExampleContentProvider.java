@@ -5,9 +5,8 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.google.gson.Gson;
-import com.tehmou.rxandroidstores.contract.DatabaseContractBase;
-import com.tehmou.rxandroidstores.example.pojo.Foobar;
 import com.tehmou.rxandroidstores.contract.DatabaseContract;
+import com.tehmou.rxandroidstores.contract.DatabaseContractBase;
 import com.tehmou.rxandroidstores.example.pojo.Foobar2;
 import com.tehmou.rxandroidstores.provider.ContractContentProviderBase;
 import com.tehmou.rxandroidstores.route.DatabaseRouteBase;
@@ -17,25 +16,14 @@ import java.util.List;
 /**
  * Created by ttuo on 04/06/15.
  */
-public class ExampleContentProvider extends ContractContentProviderBase {
-    private static final String TAG = ExampleContentProvider.class.getSimpleName();
+public class Foobar2ExampleContentProvider extends ContractContentProviderBase {
+    private static final String TAG = Foobar2ExampleContentProvider.class.getSimpleName();
 
-    public static final String PROVIDER_NAME = "com.tehmou.rxandroidstores.example.provider.ExampleContentProvider";
-    private static final String DATABASE_NAME = "database";
-    private static final int DATABASE_VERSION = 7;
+    public static final String PROVIDER_NAME = "com.tehmou.rxandroidstores.example.provider.Foobar2ExampleContentProvider";
+    private static final String DATABASE_NAME = "foobar2_database";
+    private static final int DATABASE_VERSION = 1;
 
-    public ExampleContentProvider() {
-        DatabaseContract<Foobar> foobarContract = createFoobarContract();
-        addDatabaseContract(foobarContract);
-
-        addDatabaseRoute(
-                new DatabaseRouteBase.Builder(foobarContract)
-                        .setMimeType("vnd.android.cursor.item/vnd.tehmou.android.rxandroidstores.foobar")
-                        .setPath(foobarContract.getTableName() + "/*")
-                        .setGetWhereFunc(uri -> "id = " + uri.getLastPathSegment())
-                        .build());
-
-
+    public Foobar2ExampleContentProvider() {
         DatabaseContract<Foobar2> foobar2Contract = createFoobar2Contract();
         addDatabaseContract(foobar2Contract);
 
@@ -73,25 +61,6 @@ public class ExampleContentProvider extends ContractContentProviderBase {
                         .setPath(foobar2Contract.getTableName())
                         .setGetWhereFunc(uri -> null)
                         .build());
-    }
-
-    public static DatabaseContract<Foobar> createFoobarContract() {
-        return new DatabaseContractBase.Builder<Foobar>()
-                .setTableName("foobars")
-                .setProjection(new String[]{"id","json"})
-                .setCreateTableSql("CREATE TABLE foobars (id INTEGER, json TEXT NOT NULL)")
-                .setDropTableSql("DROP TABLE IF EXISTS foobars")
-                .setReadFunc(cursor -> {
-                    final String json = cursor.getString(cursor.getColumnIndex("json"));
-                    return new Gson().fromJson(json, Foobar.class);
-                })
-                .setGetContentValuesForItemFunc(foobar -> {
-                    ContentValues contentValues = new ContentValues();
-                    contentValues.put("id", foobar.getId());
-                    contentValues.put("json", new Gson().toJson(foobar));
-                    return contentValues;
-                })
-                .build();
     }
 
     public static DatabaseContract<Foobar2> createFoobar2Contract() {

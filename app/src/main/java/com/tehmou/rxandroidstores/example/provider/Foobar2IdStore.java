@@ -4,7 +4,6 @@ import android.content.ContentResolver;
 import android.net.Uri;
 
 import com.tehmou.rxandroidstores.example.pojo.CountryIdKey;
-import com.tehmou.rxandroidstores.example.pojo.Foobar;
 import com.tehmou.rxandroidstores.example.pojo.Foobar2;
 import com.tehmou.rxandroidstores.store.SingleItemContentProviderStoreBase;
 
@@ -13,7 +12,7 @@ import com.tehmou.rxandroidstores.store.SingleItemContentProviderStoreBase;
  */
 public class Foobar2IdStore extends SingleItemContentProviderStoreBase<CountryIdKey, Foobar2> {
     public Foobar2IdStore(ContentResolver contentResolver) {
-        super(contentResolver, ExampleContentProvider.createFoobar2Contract());
+        super(contentResolver, Foobar2ExampleContentProvider.createFoobar2Contract());
     }
 
     @Override
@@ -32,7 +31,7 @@ public class Foobar2IdStore extends SingleItemContentProviderStoreBase<CountryId
 
     @Override
     protected Uri getContentUriBase() {
-        return Uri.parse("content://" + ExampleContentProvider.PROVIDER_NAME + "/"
+        return Uri.parse("content://" + Foobar2ExampleContentProvider.PROVIDER_NAME + "/"
                 + databaseContract.getTableName());
     }
 }
