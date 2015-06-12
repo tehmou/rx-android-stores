@@ -40,6 +40,7 @@ public class FoobarExampleContentProvider extends ContractContentProviderBase {
 
     public static DatabaseContract<Foobar> getFoobarContract() {
         if (foobarContract == null) {
+            final Gson gson = new Gson();
             foobarContract = new DatabaseContractBase.Builder<Foobar>()
                     .setTableName("foobars")
                     .setProjection(new String[]{"id", "json"})
@@ -47,12 +48,12 @@ public class FoobarExampleContentProvider extends ContractContentProviderBase {
                     .setDropTableSql("DROP TABLE IF EXISTS foobars")
                     .setReadFunc(cursor -> {
                         final String json = cursor.getString(cursor.getColumnIndex("json"));
-                        return new Gson().fromJson(json, Foobar.class);
+                        return gson.fromJson(json, Foobar.class);
                     })
                     .setGetContentValuesForItemFunc(foobar -> {
                         ContentValues contentValues = new ContentValues();
                         contentValues.put("id", foobar.getId());
-                        contentValues.put("json", new Gson().toJson(foobar));
+                        contentValues.put("json", gson.toJson(foobar));
                         return contentValues;
                     })
                     .build();
