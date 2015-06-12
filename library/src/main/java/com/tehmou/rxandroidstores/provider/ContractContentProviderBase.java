@@ -10,7 +10,7 @@ import android.util.Log;
 
 import com.tehmou.rxandroidstores.contract.DatabaseContract;
 import com.tehmou.rxandroidstores.route.DatabaseDeleteRoute;
-import com.tehmou.rxandroidstores.route.DatabaseInsertRoute;
+import com.tehmou.rxandroidstores.route.DatabaseInsertUpdateRoute;
 import com.tehmou.rxandroidstores.route.DatabaseQueryRoute;
 import com.tehmou.rxandroidstores.route.DatabaseRoute;
 
@@ -22,9 +22,16 @@ import java.util.List;
  */
 abstract public class ContractContentProviderBase extends ContentProviderBase {
     private static final String TAG = ContractContentProviderBase.class.getSimpleName();
+
+    private UriMatcher URI_MATCHER_INSERT;
+    private UriMatcher URI_MATCHER_UPDATE;
+    private UriMatcher URI_MATCHER_DELETE;
+    private UriMatcher URI_MATCHER_QUERY;
+
     private final List<DatabaseContract> databaseContracts = new ArrayList<>();
-    private final List<DatabaseInsertRoute> databaseInsertRoutes = new ArrayList<>();
-    private final List<DatabaseInsertRoute> databaseUpdateRoutes = new ArrayList<>();
+
+    private final List<DatabaseInsertUpdateRoute> databaseInsertRoutes = new ArrayList<>();
+    private final List<DatabaseInsertUpdateRoute> databaseUpdateRoutes = new ArrayList<>();
     private final List<DatabaseDeleteRoute> databaseDeleteRoutes = new ArrayList<>();
     private final List<DatabaseQueryRoute> databaseQueryRoutes = new ArrayList<>();
 
@@ -33,12 +40,12 @@ abstract public class ContractContentProviderBase extends ContentProviderBase {
         databaseContracts.add(databaseContract);
     }
 
-    protected void addDatabaseInsertRoute(DatabaseInsertRoute databaseRoute) {
+    protected void addDatabaseInsertRoute(DatabaseInsertUpdateRoute databaseRoute) {
         assert(databaseHelper == null);
         databaseInsertRoutes.add(databaseRoute);
     }
 
-    protected void addDatabaseUpdateRoute(DatabaseInsertRoute databaseRoute) {
+    protected void addDatabaseUpdateRoute(DatabaseInsertUpdateRoute databaseRoute) {
         assert(databaseHelper == null);
         databaseUpdateRoutes.add(databaseRoute);
     }
@@ -89,55 +96,45 @@ abstract public class ContractContentProviderBase extends ContentProviderBase {
     }
 
     @Override
-    protected String getTableNameInsert(int match) {
-        return getDatabaseInsertRouteForMatch(match).getTableName();
+    protected DatabaseInsertUpdateRoute getInsertRoute(Uri uri) {
+        final int match = URI_MATCHER_INSERT.match(uri);
+        if (match == -1) {
+            throw new IllegalArgumentException("Unknown insert URI: " + uri);
+        }
+        return databaseInsertRoutes.get(match);
     }
 
     @Override
-    protected String getTableNameUpdate(int match) {
-        return getDatabaseUpdateRouteForMatch(match).getTableName();
+    protected DatabaseInsertUpdateRoute getUpdateRoute(Uri uri) {
+        final int match = URI_MATCHER_UPDATE.match(uri);
+        if (match == -1) {
+            throw new IllegalArgumentException("Unknown update URI: " + uri);
+        }
+        return databaseUpdateRoutes.get(match);
     }
 
     @Override
-    protected String getTableNameDelete(int match) {
-        return getDatabaseDeleteRouteForMatch(match).getTableName();
+    protected DatabaseDeleteRoute getDeleteRoute(Uri uri) {
+        final int match = URI_MATCHER_DELETE.match(uri);
+        if (match == -1) {
+            throw new IllegalArgumentException("Unknown delete URI: " + uri);
+        }
+        return databaseDeleteRoutes.get(match);
     }
 
     @Override
-    protected String getTableNameQuery(int match) {
-        return getDatabaseQueryRouteForMatch(match).getTableName();
-    }
-
-    @Override
-    protected String getWhereInsert(int match, Uri uri) {
-        return getDatabaseInsertRouteForMatch(match).getWhere(uri);
-    }
-
-    @Override
-    protected String getWhereUpdate(int match, Uri uri) {
-        return getDatabaseUpdateRouteForMatch(match).getWhere(uri);
-    }
-
-    @Override
-    protected String getWhereDelete(int match, Uri uri) {
-        return getDatabaseDeleteRouteForMatch(match).getWhere(uri);
-    }
-
-    @Override
-    protected String getWhereQuery(int match, Uri uri) {
-        return getDatabaseQueryRouteForMatch(match).getWhere(uri);
-    }
-
-    @Override
-    protected String getDefaultSortOrderQuery(int match) {
-        return getDatabaseQueryRouteForMatch(match).getSortOrder();
+    protected DatabaseQueryRoute getQueryRoute(Uri uri) {
+        final int match = URI_MATCHER_QUERY.match(uri);
+        if (match == -1) {
+            throw new IllegalArgumentException("Unknown query URI: " + uri);
+        }
+        return databaseQueryRoutes.get(match);
     }
 
     @Override
     public String getType(Uri uri) {
         // We assume the query uri makes sense here
-        final int match = URI_MATCHER_QUERY.match(uri);
-        return getDatabaseQueryRouteForMatch(match).getMimeType();
+        return getQueryRoute(uri).getMimeType();
     }
 
     @Override
@@ -148,9 +145,16 @@ abstract public class ContractContentProviderBase extends ContentProviderBase {
 
     @Override
     protected void createUriMatchers() {
+        Log.v(TAG, "Create insert matcher");
         URI_MATCHER_INSERT = createUriMatcher(databaseInsertRoutes);
+
+        Log.v(TAG, "Create update matcher");
         URI_MATCHER_UPDATE = createUriMatcher(databaseUpdateRoutes);
+
+        Log.v(TAG, "Create delete matcher");
         URI_MATCHER_DELETE = createUriMatcher(databaseDeleteRoutes);
+
+        Log.v(TAG, "Create query matcher");
         URI_MATCHER_QUERY = createUriMatcher(databaseQueryRoutes);
     }
 
@@ -162,34 +166,6 @@ abstract public class ContractContentProviderBase extends ContentProviderBase {
             uriMatcher.addURI(getProviderName(), databaseRoute.getPath(), i++);
         }
         return uriMatcher;
-    }
-
-    protected DatabaseInsertRoute getDatabaseInsertRouteForMatch(final int match) {
-        return databaseInsertRoutes.get(match);
-    }
-
-    protected DatabaseInsertRoute getDatabaseUpdateRouteForMatch(final int match) {
-        return databaseUpdateRoutes.get(match);
-    }
-
-    protected DatabaseDeleteRoute getDatabaseDeleteRouteForMatch(final int match) {
-        return databaseDeleteRoutes.get(match);
-    }
-
-    protected DatabaseQueryRoute getDatabaseQueryRouteForMatch(final int match) {
-        return databaseQueryRoutes.get(match);
-    }
-
-    @Override
-    protected void notifyChange(int match, Uri uri) {
-        getDatabaseDeleteRouteForMatch(match).notifyChange(uri,
-                (value) -> getContext().getContentResolver().notifyChange(value, null));
-    }
-
-    @Override
-    protected void notifyChange(int match, ContentValues contentValues, Uri uri) {
-        getDatabaseInsertRouteForMatch(match).notifyChange(contentValues, uri,
-                (value) -> getContext().getContentResolver().notifyChange(value, null));
     }
 
     abstract protected String getProviderName();

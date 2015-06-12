@@ -13,16 +13,14 @@ import rx.functions.Func1;
 /**
  * Created by ttuo on 04/05/15.
  */
-public class DatabaseRouteBase implements DatabaseQueryRoute, DatabaseInsertRoute, DatabaseDeleteRoute {
+public class DatabaseRouteBase implements DatabaseQueryRoute, DatabaseInsertUpdateRoute, DatabaseDeleteRoute {
     private final String tableName;
     private final String path;
     private final String sortOrder;
     private final Func1<Uri, String> getWhereFunc;
     private final String mimeType;
-    private Action3<ContentValues, Uri, Action1<Uri>> notifyChangeInsertFunc =
-            (contentValues, uri, notifyChange) -> notifyChange.call(uri);
-    private Action2<Uri, Action1<Uri>> notifyChangeFunc =
-            (uri, notifyChange) -> notifyChange.call(uri);
+    private Action3<ContentValues, Uri, Action1<Uri>> notifyChangeInsertFunc;
+    private Action2<Uri, Action1<Uri>> notifyChangeFunc;
 
     private DatabaseRouteBase(Builder builder) {
         this.tableName = builder.tableName;
@@ -45,6 +43,7 @@ public class DatabaseRouteBase implements DatabaseQueryRoute, DatabaseInsertRout
 
     @Override
     public void notifyChange(ContentValues contentValues, Uri uri, Action1<Uri> notifyChange) {
+        // First check the more specific notifyChange function
         if (notifyChangeInsertFunc != null) {
             notifyChangeInsertFunc.call(contentValues, uri, notifyChange);
         } else {
@@ -78,8 +77,7 @@ public class DatabaseRouteBase implements DatabaseQueryRoute, DatabaseInsertRout
         private String sortOrder;
         private Func1<Uri, String> getWhereFunc;
         private String mimeType;
-        private Action3<ContentValues, Uri, Action1<Uri>> notifyChangeInsertFunc =
-                (contentValues, uri, notifyChange) -> notifyChange.call(uri);
+        private Action3<ContentValues, Uri, Action1<Uri>> notifyChangeInsertFunc;
         private Action2<Uri, Action1<Uri>> notifyChangeFunc =
                 (uri, notifyChange) -> notifyChange.call(uri);
 

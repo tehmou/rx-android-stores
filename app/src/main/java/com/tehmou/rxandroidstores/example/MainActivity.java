@@ -1,18 +1,24 @@
 package com.tehmou.rxandroidstores.example;
 
+import android.net.Uri;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 import com.tehmou.bettercontentprovider.R;
 import com.tehmou.rxandroidstores.example.pojo.CountryIdKey;
 import com.tehmou.rxandroidstores.example.pojo.Foobar;
 import com.tehmou.rxandroidstores.example.pojo.Foobar2;
 import com.tehmou.rxandroidstores.example.provider.Foobar2ByCountryStore;
+import com.tehmou.rxandroidstores.example.provider.Foobar2ExampleContentProvider;
 import com.tehmou.rxandroidstores.example.provider.Foobar2IdStore;
+import com.tehmou.rxandroidstores.example.provider.FoobarExampleContentProvider;
 import com.tehmou.rxandroidstores.example.provider.FoobarIdStore;
+
+import rx.android.schedulers.AndroidSchedulers;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -25,20 +31,40 @@ public class MainActivity extends ActionBarActivity {
 
         Log.d(TAG, "onCreate");
 
+        // Clean up the DB
+        getContentResolver().delete(
+                Uri.parse("content://" + FoobarExampleContentProvider.PROVIDER_NAME + "/foobars"),
+                null, null);
+        getContentResolver().delete(
+                Uri.parse("content://" + Foobar2ExampleContentProvider.PROVIDER_NAME + "/foobars2"),
+                null, null);
+
         // Foobar stores
         FoobarIdStore foobarIdStore = new FoobarIdStore(getContentResolver());
         foobarIdStore.getStream(1234)
-                .subscribe(foobar -> Log.d(TAG, "Foobar: " + foobar.getValue()));
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(foobar -> {
+                    Log.d(TAG, "Foobar: " + foobar.getValue());
+                    ((TextView) findViewById(R.id.text1)).setText(foobar.getValue());
+                });
         foobarIdStore.put(new Foobar(1234, "Success"));
-
 
         // Foobar2 stores
         Foobar2IdStore foobar2IdStore = new Foobar2IdStore(getContentResolver());
         Foobar2ByCountryStore countryStore = new Foobar2ByCountryStore(getContentResolver());
         countryStore.getStream("FIN")
-                .subscribe(foobarList -> Log.d(TAG, "Foobar2 list: " + foobarList.size()));
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(foobarList -> {
+                    Log.d(TAG, "Foobar2 list: " + foobarList.size());
+                    ((TextView) findViewById(R.id.text2)).setText(
+                            foobarList.size() > 0 ? "Success" : "Fail");
+                });
         foobar2IdStore.getStream(new CountryIdKey("FIN", 1234))
-                .subscribe(foobar -> Log.d(TAG, "Foobar2: " + foobar.getValue()));
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(foobar2 -> {
+                    Log.d(TAG, "Foobar2: " + foobar2.getValue());
+                    ((TextView) findViewById(R.id.text3)).setText(foobar2.getValue());
+                });
         foobar2IdStore.put(new Foobar2(1234, "FIN", 100, "Success"));
     }
 

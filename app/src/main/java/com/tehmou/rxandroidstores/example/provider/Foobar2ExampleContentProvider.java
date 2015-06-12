@@ -2,16 +2,20 @@ package com.tehmou.rxandroidstores.example.provider;
 
 import android.content.ContentValues;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.gson.Gson;
 import com.tehmou.rxandroidstores.contract.DatabaseContract;
 import com.tehmou.rxandroidstores.contract.DatabaseContractBase;
 import com.tehmou.rxandroidstores.example.pojo.Foobar2;
+import com.tehmou.rxandroidstores.provider.ContentProviderBase;
 import com.tehmou.rxandroidstores.provider.ContractContentProviderBase;
 import com.tehmou.rxandroidstores.route.DatabaseQueryRoute;
+import com.tehmou.rxandroidstores.route.DatabaseRoute;
 import com.tehmou.rxandroidstores.route.DatabaseRouteBase;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,7 +33,7 @@ public class Foobar2ExampleContentProvider extends ContractContentProviderBase {
         addDatabaseContract(foobar2Contract);
 
         // Notice that the order has to be from more restrictive to less restrictive.
-        DatabaseRouteBase idDatabaseRoute = new DatabaseRouteBase.Builder(foobar2Contract)
+        DatabaseRouteBase idRoute = new DatabaseRouteBase.Builder(foobar2Contract)
                 .setMimeType("vnd.android.cursor.item/vnd.tehmou.android.rxandroidstores.foobar2")
                 .setPath(foobar2Contract.getTableName() + "/country/*/id/*")
                 .setGetWhereFunc(uri -> {
@@ -39,32 +43,35 @@ public class Foobar2ExampleContentProvider extends ContractContentProviderBase {
                     return "country = '" + country + "' AND id = " + id;
                 })
                 .setNotifyChangeFunc((uri, notifyUri) -> {
+                    Log.d(TAG, "idRoute notifyChange(" + uri + ")");
                     notifyUri.call(uri);
-                    Uri countryUri = Uri.EMPTY;
-                    final List<String> pathSegments = uri.getPathSegments();
-                    for (int i = 0; i < pathSegments.size() - 3; i++) {
-                        countryUri = Uri.withAppendedPath(countryUri, pathSegments.get(i));
-                    }
+
+                    Uri countryUri = ContentProviderBase.removeLastPathSegments(uri, 2);
                     Log.v(TAG, "Notifying country uri " + countryUri);
                     notifyUri.call(countryUri);
                 })
                 .build();
-        addDatabaseDeleteRoute(idDatabaseRoute);
-        addDatabaseInsertRoute(idDatabaseRoute);
-        addDatabaseUpdateRoute(idDatabaseRoute);
-        addDatabaseQueryRoute(idDatabaseRoute);
-        addDatabaseQueryRoute(
-                new DatabaseRouteBase.Builder(foobar2Contract)
-                        .setMimeType("vnd.android.cursor.dir/vnd.tehmou.android.rxandroidstores.foobar2")
-                        .setPath(foobar2Contract.getTableName() + "/country/*")
-                        .setGetWhereFunc(uri -> "country = '" + uri.getLastPathSegment() + "'")
-                        .build());
-        addDatabaseQueryRoute(
-                new DatabaseRouteBase.Builder(foobar2Contract)
-                        .setMimeType("vnd.android.cursor.dir/vnd.tehmou.android.rxandroidstores.foobar2")
-                        .setPath(foobar2Contract.getTableName())
-                        .setGetWhereFunc(uri -> null)
-                        .build());
+        addDatabaseDeleteRoute(idRoute);
+        addDatabaseInsertRoute(idRoute);
+        addDatabaseUpdateRoute(idRoute);
+        addDatabaseQueryRoute(idRoute);
+
+        // Country route
+        DatabaseRouteBase countryRoute = new DatabaseRouteBase.Builder(foobar2Contract)
+                .setMimeType("vnd.android.cursor.dir/vnd.tehmou.android.rxandroidstores.foobar2")
+                .setPath(foobar2Contract.getTableName() + "/country/*")
+                .setGetWhereFunc(uri -> "country = '" + uri.getLastPathSegment() + "'")
+                .build();
+        addDatabaseQueryRoute(countryRoute);
+
+        // Root route
+        DatabaseRouteBase rootRoute = new DatabaseRouteBase.Builder(foobar2Contract)
+                .setMimeType("vnd.android.cursor.dir/vnd.tehmou.android.rxandroidstores.foobar2")
+                .setPath(foobar2Contract.getTableName())
+                .setGetWhereFunc(uri -> null)
+                .build();
+        addDatabaseQueryRoute(rootRoute);
+        addDatabaseDeleteRoute(rootRoute);
     }
 
     public static DatabaseContract<Foobar2> createFoobar2Contract() {

@@ -45,6 +45,7 @@ public abstract class ListContentProviderStoreBase<T, U> extends ContentProvider
                 Log.v(TAG, "onChange(" + uri + ")");
 
                 if (subjectMap.containsKey(uri)) {
+                    Log.v(TAG, "Updating subject at: " + uri + ")");
                     subjectMap.get(uri).onNext(queryList(uri));
                 }
             }
@@ -63,8 +64,11 @@ public abstract class ListContentProviderStoreBase<T, U> extends ContentProvider
     }
 
     private Observable<List<U>> lazyGetSubject(T id) {
-        Log.v(TAG, "lazyGetSubject(" + id + ")");
-        final Uri uri = getUriForKey(id);
+        return lazyGetSubject(getUriForKey(id));
+    }
+
+    private Observable<List<U>> lazyGetSubject(Uri uri) {
+        Log.v(TAG, "lazyGetSubject(" + uri + ")");
         subjectMap.putIfAbsent(uri, PublishSubject.<List<U>>create());
         return subjectMap.get(uri);
     }
