@@ -36,6 +36,7 @@ public class FoobarExampleContentProvider extends ContractContentProviderBase {
 
         DatabaseRouteBase rootRoute = getRootRoute();
         addDatabaseDeleteRoute(rootRoute);
+        addDatabaseQueryRoute(rootRoute);
     }
 
     public static DatabaseContract<Foobar> getFoobarContract() {
@@ -63,6 +64,8 @@ public class FoobarExampleContentProvider extends ContractContentProviderBase {
 
     public static DatabaseRouteBase getIdRoute() {
         if (foobarIdRoute == null) {
+            // The root notifyChange is triggered automatically when
+            // a value updates. No need to override.
             foobarIdRoute = new DatabaseRouteBase.Builder(foobarContract)
                     .setMimeType("vnd.android.cursor.item/vnd.tehmou.android.rxandroidstores.foobar")
                     .setPath(foobarContract.getTableName() + "/*")

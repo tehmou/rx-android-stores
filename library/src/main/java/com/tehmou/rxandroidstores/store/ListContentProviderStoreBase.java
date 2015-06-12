@@ -19,7 +19,7 @@ import rx.subjects.Subject;
 /**
  * Created by ttuo on 11/06/15.
  */
-public abstract class ListContentProviderStoreBase<T, U> extends ContentProviderStoreBase<T, U> {
+public abstract class ListContentProviderStoreBase<T, U> extends ContentProviderStoreBase<U> {
     private static final String TAG = ListContentProviderStoreBase.class.getSimpleName();
     private final ConcurrentMap<Uri, Subject<List<U>, List<U>>> subjectMap = new ConcurrentHashMap<>();
 

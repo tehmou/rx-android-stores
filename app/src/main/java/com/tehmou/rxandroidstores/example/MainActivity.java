@@ -17,6 +17,7 @@ import com.tehmou.rxandroidstores.example.provider.Foobar2ExampleContentProvider
 import com.tehmou.rxandroidstores.example.provider.Foobar2IdStore;
 import com.tehmou.rxandroidstores.example.provider.FoobarExampleContentProvider;
 import com.tehmou.rxandroidstores.example.provider.FoobarIdStore;
+import com.tehmou.rxandroidstores.example.provider.FoobarRootStore;
 
 import rx.android.schedulers.AndroidSchedulers;
 
@@ -39,15 +40,27 @@ public class MainActivity extends ActionBarActivity {
                 Uri.parse("content://" + Foobar2ExampleContentProvider.PROVIDER_NAME + "/foobars2"),
                 null, null);
 
-        // Foobar stores
+        // Foobar root store
+        FoobarRootStore foobarRootStore = new FoobarRootStore(getContentResolver(),
+                FoobarExampleContentProvider.getFoobarContract());
+        foobarRootStore.getAll()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(foobarList -> {
+                    Log.d(TAG, "Foobar root: " + foobarList.size());
+                    ((TextView) findViewById(R.id.text1)).setText(
+                            foobarList.size() > 0 ? "Success" : "Fail");
+                });
+
+        // Foobar store by id
         FoobarIdStore foobarIdStore = new FoobarIdStore(getContentResolver(),
                 FoobarExampleContentProvider.getFoobarContract());
         foobarIdStore.getStream(1234)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(foobar -> {
                     Log.d(TAG, "Foobar: " + foobar.getValue());
-                    ((TextView) findViewById(R.id.text1)).setText(foobar.getValue());
+                    ((TextView) findViewById(R.id.text2)).setText(foobar.getValue());
                 });
+
         foobarIdStore.put(new Foobar(1234, "Success"));
 
         // Foobar2 stores
@@ -59,14 +72,14 @@ public class MainActivity extends ActionBarActivity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(foobarList -> {
                     Log.d(TAG, "Foobar2 list: " + foobarList.size());
-                    ((TextView) findViewById(R.id.text2)).setText(
+                    ((TextView) findViewById(R.id.text3)).setText(
                             foobarList.size() > 0 ? "Success" : "Fail");
                 });
         foobar2IdStore.getStream(new CountryIdKey("FIN", 1234))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(foobar2 -> {
                     Log.d(TAG, "Foobar2: " + foobar2.getValue());
-                    ((TextView) findViewById(R.id.text3)).setText(foobar2.getValue());
+                    ((TextView) findViewById(R.id.text4)).setText(foobar2.getValue());
                 });
         foobar2IdStore.put(new Foobar2(1234, "FIN", 100, "Success"));
     }

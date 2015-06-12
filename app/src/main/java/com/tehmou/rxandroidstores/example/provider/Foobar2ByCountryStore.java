@@ -15,12 +15,7 @@ public class Foobar2ByCountryStore extends ListContentProviderStoreBase<String, 
                                  DatabaseContract<Foobar2> databaseContract) {
         super(contentResolver, databaseContract);
     }
-
-    @Override
-    protected String getIdFor(Foobar2 item) {
-        return item.getCountry();
-    }
-
+    
     @Override
     protected Uri getContentUriBase() {
         return Uri.parse("content://" + Foobar2ExampleContentProvider.PROVIDER_NAME + "/"

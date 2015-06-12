@@ -19,7 +19,7 @@ import rx.subjects.Subject;
 /**
  * Created by ttuo on 11/06/15.
  */
-public abstract class SingleItemContentProviderStoreBase<T, U> extends ContentProviderStoreBase<T, U> {
+public abstract class SingleItemContentProviderStoreBase<T, U> extends ContentProviderStoreBase<U> {
     private static final String TAG = SingleItemContentProviderStoreBase.class.getSimpleName();
     private final ConcurrentMap<Uri, Subject<U, U>> subjectMap = new ConcurrentHashMap<>();
 
@@ -78,4 +78,6 @@ public abstract class SingleItemContentProviderStoreBase<T, U> extends ContentPr
         subjectMap.putIfAbsent(uri, PublishSubject.<U>create());
         return subjectMap.get(uri);
     }
+
+    protected abstract T getIdFor(U item);
 }

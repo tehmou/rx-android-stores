@@ -24,7 +24,7 @@ import rx.subjects.Subject;
 /**
  * Created by ttuo on 26/04/15.
  */
-public abstract class ContentProviderStoreBase<T, U> {
+public abstract class ContentProviderStoreBase<U> {
     private static final String TAG = ContentProviderStoreBase.class.getSimpleName();
 
     protected final ContentResolver contentResolver;
@@ -83,6 +83,5 @@ public abstract class ContentProviderStoreBase<T, U> {
     }
 
     protected abstract Uri getContentUriBase();
-    protected abstract T getIdFor(U item);
     protected abstract ContentObserver getContentObserver();
 }
