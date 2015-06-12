@@ -3,6 +3,7 @@ package com.tehmou.rxandroidstores.example.provider;
 import android.content.ContentResolver;
 import android.net.Uri;
 
+import com.tehmou.rxandroidstores.contract.DatabaseContract;
 import com.tehmou.rxandroidstores.example.pojo.Foobar;
 import com.tehmou.rxandroidstores.store.SingleItemContentProviderStoreBase;
 
@@ -10,8 +11,9 @@ import com.tehmou.rxandroidstores.store.SingleItemContentProviderStoreBase;
  * Created by ttuo on 04/06/15.
  */
 public class FoobarIdStore extends SingleItemContentProviderStoreBase<Integer, Foobar> {
-    public FoobarIdStore(ContentResolver contentResolver) {
-        super(contentResolver, FoobarExampleContentProvider.createFoobarContract());
+    public FoobarIdStore(ContentResolver contentResolver,
+                         DatabaseContract<Foobar> databaseContract) {
+        super(contentResolver, databaseContract);
     }
 
     @Override

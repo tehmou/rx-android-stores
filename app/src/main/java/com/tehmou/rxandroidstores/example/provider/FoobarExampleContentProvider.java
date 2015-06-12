@@ -20,44 +20,65 @@ public class FoobarExampleContentProvider extends ContractContentProviderBase {
     private static final String DATABASE_NAME = "foobar_database";
     private static final int DATABASE_VERSION = 1;
 
+    private static DatabaseContract<Foobar> foobarContract;
+    private static DatabaseRouteBase foobarIdRoute;
+    private static DatabaseRouteBase foobarRootRoute;
+
     public FoobarExampleContentProvider() {
-        DatabaseContract<Foobar> foobarContract = createFoobarContract();
+        DatabaseContract<Foobar> foobarContract = getFoobarContract();
         addDatabaseContract(foobarContract);
 
-        DatabaseRouteBase idRoute = new DatabaseRouteBase.Builder(foobarContract)
-                .setMimeType("vnd.android.cursor.item/vnd.tehmou.android.rxandroidstores.foobar")
-                .setPath(foobarContract.getTableName() + "/*")
-                .setGetWhereFunc(uri -> "id = " + uri.getLastPathSegment())
-                .build();
+        DatabaseRouteBase idRoute = getIdRoute();
         addDatabaseInsertRoute(idRoute);
         addDatabaseUpdateRoute(idRoute);
         addDatabaseDeleteRoute(idRoute);
         addDatabaseQueryRoute(idRoute);
 
-        DatabaseRouteBase rootRoute = new DatabaseRouteBase.Builder(foobarContract)
-                .setPath(foobarContract.getTableName())
-                .setGetWhereFunc(uri -> null)
-                .build();
+        DatabaseRouteBase rootRoute = getRootRoute();
         addDatabaseDeleteRoute(rootRoute);
     }
 
-    public static DatabaseContract<Foobar> createFoobarContract() {
-        return new DatabaseContractBase.Builder<Foobar>()
-                .setTableName("foobars")
-                .setProjection(new String[]{"id","json"})
-                .setCreateTableSql("CREATE TABLE foobars (id INTEGER, json TEXT NOT NULL)")
-                .setDropTableSql("DROP TABLE IF EXISTS foobars")
-                .setReadFunc(cursor -> {
-                    final String json = cursor.getString(cursor.getColumnIndex("json"));
-                    return new Gson().fromJson(json, Foobar.class);
-                })
-                .setGetContentValuesForItemFunc(foobar -> {
-                    ContentValues contentValues = new ContentValues();
-                    contentValues.put("id", foobar.getId());
-                    contentValues.put("json", new Gson().toJson(foobar));
-                    return contentValues;
-                })
-                .build();
+    public static DatabaseContract<Foobar> getFoobarContract() {
+        if (foobarContract == null) {
+            foobarContract = new DatabaseContractBase.Builder<Foobar>()
+                    .setTableName("foobars")
+                    .setProjection(new String[]{"id", "json"})
+                    .setCreateTableSql("CREATE TABLE foobars (id INTEGER, json TEXT NOT NULL)")
+                    .setDropTableSql("DROP TABLE IF EXISTS foobars")
+                    .setReadFunc(cursor -> {
+                        final String json = cursor.getString(cursor.getColumnIndex("json"));
+                        return new Gson().fromJson(json, Foobar.class);
+                    })
+                    .setGetContentValuesForItemFunc(foobar -> {
+                        ContentValues contentValues = new ContentValues();
+                        contentValues.put("id", foobar.getId());
+                        contentValues.put("json", new Gson().toJson(foobar));
+                        return contentValues;
+                    })
+                    .build();
+        }
+        return foobarContract;
+    }
+
+    public static DatabaseRouteBase getIdRoute() {
+        if (foobarIdRoute == null) {
+            foobarIdRoute = new DatabaseRouteBase.Builder(foobarContract)
+                    .setMimeType("vnd.android.cursor.item/vnd.tehmou.android.rxandroidstores.foobar")
+                    .setPath(foobarContract.getTableName() + "/*")
+                    .setGetWhereFunc(uri -> "id = " + uri.getLastPathSegment())
+                    .build();
+        }
+        return foobarIdRoute;
+    }
+
+    public static DatabaseRouteBase getRootRoute() {
+        if (foobarRootRoute == null) {
+            foobarRootRoute = new DatabaseRouteBase.Builder(foobarContract)
+                    .setPath(foobarContract.getTableName())
+                    .setGetWhereFunc(uri -> null)
+                    .build();
+        }
+        return foobarRootRoute;
     }
 
     @Override

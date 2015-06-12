@@ -40,7 +40,8 @@ public class MainActivity extends ActionBarActivity {
                 null, null);
 
         // Foobar stores
-        FoobarIdStore foobarIdStore = new FoobarIdStore(getContentResolver());
+        FoobarIdStore foobarIdStore = new FoobarIdStore(getContentResolver(),
+                FoobarExampleContentProvider.getFoobarContract());
         foobarIdStore.getStream(1234)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(foobar -> {
@@ -50,8 +51,10 @@ public class MainActivity extends ActionBarActivity {
         foobarIdStore.put(new Foobar(1234, "Success"));
 
         // Foobar2 stores
-        Foobar2IdStore foobar2IdStore = new Foobar2IdStore(getContentResolver());
-        Foobar2ByCountryStore countryStore = new Foobar2ByCountryStore(getContentResolver());
+        Foobar2IdStore foobar2IdStore = new Foobar2IdStore(getContentResolver(),
+                Foobar2ExampleContentProvider.getFoobar2Contract());
+        Foobar2ByCountryStore countryStore = new Foobar2ByCountryStore(getContentResolver(),
+                Foobar2ExampleContentProvider.getFoobar2Contract());
         countryStore.getStream("FIN")
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(foobarList -> {
