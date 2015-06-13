@@ -11,6 +11,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.tehmou.rxandroidstores.contract.DatabaseContract;
+import com.tehmou.rxandroidstores.route.DatabaseQueryRoute;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,13 +1,12 @@
-package com.tehmou.rxandroidstores.example.provider;
+package com.tehmou.rxandroidstores.example.example1;
 
 import android.content.ContentResolver;
 import android.database.ContentObserver;
 import android.net.Uri;
 
 import com.tehmou.rxandroidstores.contract.DatabaseContract;
-import com.tehmou.rxandroidstores.example.pojo.Foobar;
+import com.tehmou.rxandroidstores.example.pojo.Record;
 import com.tehmou.rxandroidstores.store.ContentProviderStoreBase;
-import com.tehmou.rxandroidstores.store.ListContentProviderStoreBase;
 
 import java.util.List;
 
@@ -18,11 +17,11 @@ import rx.subjects.Subject;
 /**
  * Created by ttuo on 12/06/15.
  */
-public class FoobarRootStore extends ContentProviderStoreBase<Foobar> {
-    private Subject<List<Foobar>, List<Foobar>> subject;
+public class RecordRootStore extends ContentProviderStoreBase<Record> {
+    private Subject<List<Record>, List<Record>> subject;
 
-    public FoobarRootStore(ContentResolver contentResolver,
-                                    DatabaseContract<Foobar> databaseContract) {
+    public RecordRootStore(ContentResolver contentResolver,
+                           DatabaseContract<Record> databaseContract) {
         super(contentResolver, databaseContract);
     }
 
@@ -39,7 +38,7 @@ public class FoobarRootStore extends ContentProviderStoreBase<Foobar> {
         };
     }
 
-    public Observable<List<Foobar>> getAll() {
+    public Observable<List<Record>> getAll() {
         if (subject == null) {
             subject = PublishSubject.create();
             return subject.startWith(queryList(getContentUriBase()));
@@ -49,7 +48,7 @@ public class FoobarRootStore extends ContentProviderStoreBase<Foobar> {
 
     @Override
     protected Uri getContentUriBase() {
-        return Uri.parse("content://" + FoobarExampleContentProvider.PROVIDER_NAME + "/"
+        return Uri.parse("content://" + RecordExampleContentProvider.PROVIDER_NAME + "/"
                 + databaseContract.getTableName());
     }
 }
