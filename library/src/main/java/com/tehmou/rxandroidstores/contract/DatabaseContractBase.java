@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 
+import rx.android.internal.Preconditions;
 import rx.functions.Func1;
 
 /**
@@ -27,6 +28,9 @@ public class DatabaseContractBase<T> implements DatabaseContract<T> {
                                  String[] projection,
                                  String defaultSortOrder,
                                  Func1<Uri, String> getDefaultWhereFunc) {
+        Preconditions.checkNotNull(tableName, "Missing tableName");
+        Preconditions.checkNotNull(createTableSql, "Missing createTableSql");
+        Preconditions.checkNotNull(dropTableSql, "Missing dropTableSql");
         this.createTableSql = createTableSql;
         this.dropTableSql = dropTableSql;
         this.tableName = tableName;

@@ -28,6 +28,12 @@
             android:name="com.tehmou.rxandroidstores.example.example2.Record2ExampleContentProvider"
             android:exported="false">
         </provider>
+
+        <provider
+            android:authorities="com.tehmou.rxandroidstores.example.example3.Record3ExampleContentProvider"
+            android:name="com.tehmou.rxandroidstores.example.example3.Record3ExampleContentProvider"
+            android:exported="false">
+        </provider>
     </application>
 
 </manifest>
