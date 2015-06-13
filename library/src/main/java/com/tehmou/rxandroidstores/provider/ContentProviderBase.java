@@ -73,6 +73,7 @@ abstract public class ContentProviderBase extends ContentProvider {
         }
 
         builder.setTables(route.getTableName());
+        builder.setProjectionMap(route.getProjectionMap());
         Cursor cursor =
                 builder.query(
                         db,

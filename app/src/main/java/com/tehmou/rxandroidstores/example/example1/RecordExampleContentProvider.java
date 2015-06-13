@@ -18,7 +18,7 @@ public class RecordExampleContentProvider extends ContractContentProviderBase {
 
     public static final String PROVIDER_NAME = "com.tehmou.rxandroidstores.example.example1.RecordExampleContentProvider";
     private static final String DATABASE_NAME = "record_database";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 3;
 
     private static DatabaseContract<Record> recordContract;
     private static DatabaseRouteBase recordIdRoute;

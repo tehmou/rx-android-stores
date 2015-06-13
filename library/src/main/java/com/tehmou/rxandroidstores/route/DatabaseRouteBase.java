@@ -5,9 +5,12 @@ import android.net.Uri;
 
 import com.tehmou.rxandroidstores.contract.DatabaseContract;
 
+import java.util.Map;
+
 import rx.functions.Action1;
 import rx.functions.Action2;
 import rx.functions.Action3;
+import rx.functions.Func0;
 import rx.functions.Func1;
 
 /**
@@ -21,6 +24,7 @@ public class DatabaseRouteBase implements DatabaseQueryRoute, DatabaseInsertUpda
     private final String mimeType;
     private Action3<ContentValues, Uri, Action1<Uri>> notifyChangeInsertFunc;
     private Action2<Uri, Action1<Uri>> notifyChangeFunc;
+    private Map<String, String> projectionMap;
 
     private DatabaseRouteBase(Builder builder) {
         this.tableName = builder.tableName;
@@ -30,6 +34,7 @@ public class DatabaseRouteBase implements DatabaseQueryRoute, DatabaseInsertUpda
         this.mimeType = builder.mimeType;
         this.notifyChangeInsertFunc = builder.notifyChangeInsertFunc;
         this.notifyChangeFunc = builder.notifyChangeFunc;
+        this.projectionMap = builder.projectionMap;
     }
 
     @Override
@@ -71,6 +76,11 @@ public class DatabaseRouteBase implements DatabaseQueryRoute, DatabaseInsertUpda
         return mimeType;
     }
 
+    @Override
+    public Map<String, String> getProjectionMap() {
+        return projectionMap;
+    }
+
     public static class Builder {
         private String tableName;
         private Func1<String, String> pathFunc;
@@ -80,6 +90,7 @@ public class DatabaseRouteBase implements DatabaseQueryRoute, DatabaseInsertUpda
         private Action3<ContentValues, Uri, Action1<Uri>> notifyChangeInsertFunc;
         private Action2<Uri, Action1<Uri>> notifyChangeFunc =
                 (uri, notifyChange) -> notifyChange.call(uri);
+        private Map<String, String> projectionMap;
 
         public Builder(DatabaseContract databaseContract) {
             this.tableName = databaseContract.getTableName();
@@ -116,6 +127,11 @@ public class DatabaseRouteBase implements DatabaseQueryRoute, DatabaseInsertUpda
 
         public Builder setMimeType(String mimeType) {
             this.mimeType = mimeType;
+            return this;
+        }
+
+        public Builder setProjectionMap(Map<String, String> projectionMap) {
+            this.projectionMap = projectionMap;
             return this;
         }
 

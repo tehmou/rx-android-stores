@@ -23,7 +23,7 @@ public class Record2ExampleContentProvider extends ContractContentProviderBase {
 
     public static final String PROVIDER_NAME = "com.tehmou.rxandroidstores.example.example2.Record2ExampleContentProvider";
     private static final String DATABASE_NAME = "record2_database";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 3;
 
     private static DatabaseContract<Record> record2Contract;
     private static DatabaseRouteBase record2IdRoute;
@@ -64,11 +64,11 @@ public class Record2ExampleContentProvider extends ContractContentProviderBase {
                         final String json = cursor.getString(cursor.getColumnIndex("json"));
                         return gson.fromJson(json, Record.class);
                     })
-                    .setGetContentValuesForItemFunc(record2 -> {
+                    .setGetContentValuesForItemFunc(record -> {
                         ContentValues contentValues = new ContentValues();
-                        contentValues.put("id", record2.getId());
-                        contentValues.put("country", record2.getCountry());
-                        contentValues.put("json", gson.toJson(record2));
+                        contentValues.put("id", record.getId());
+                        contentValues.put("country", record.getCountry());
+                        contentValues.put("json", gson.toJson(record));
                         return contentValues;
                     })
                     .build();

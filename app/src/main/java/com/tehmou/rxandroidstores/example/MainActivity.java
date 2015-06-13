@@ -115,6 +115,16 @@ public class MainActivity extends ActionBarActivity {
         contentResolver.insert(
                 Uri.parse("content://" + Record3ExampleContentProvider.PROVIDER_NAME + "/users"),
                 Record3ExampleContentProvider.getUserContract().getContentValuesForItem(user));
+        Cursor cursor = contentResolver.query(
+                Uri.parse("content://" + Record3ExampleContentProvider.PROVIDER_NAME + "/records/4/user"),
+                null,
+                null, null, null);
+        cursor.moveToFirst();
+        final User user2 = Record3ExampleContentProvider.getUserContract().read(cursor);
+        cursor.close();
+        if (user2 != null) {
+            ((TextView) findViewById(R.id.text5)).setText("Success");
+        }
     }
 
     @Override
