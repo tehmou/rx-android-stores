@@ -11,8 +11,8 @@ import rx.functions.Func1;
  * Created by ttuo on 04/06/15.
  */
 public class DatabaseContractBase<T> implements DatabaseContract<T> {
-    final private String createTableSql;
-    final private String dropTableSql;
+    final private Func1<String, String> createTableSqlFunc;
+    final private Func1<String, String> dropTableSqlFunc;
     final private String tableName;
     final private Func1<Cursor, T> readFunc;
     final private Func1<T, ContentValues> getContentValuesForItemFunc;
@@ -20,8 +20,8 @@ public class DatabaseContractBase<T> implements DatabaseContract<T> {
     final private String defaultSortOrder;
     final Func1<Uri, String> getDefaultWhereFunc;
 
-    private DatabaseContractBase(String createTableSql,
-                                 String dropTableSql,
+    private DatabaseContractBase(Func1<String, String> createTableSqlFunc,
+                                 Func1<String, String> dropTableSqlFunc,
                                  String tableName,
                                  Func1<Cursor, T> readFunc,
                                  Func1<T, ContentValues> getContentValuesForItemFunc,
@@ -29,10 +29,10 @@ public class DatabaseContractBase<T> implements DatabaseContract<T> {
                                  String defaultSortOrder,
                                  Func1<Uri, String> getDefaultWhereFunc) {
         Preconditions.checkNotNull(tableName, "Missing tableName");
-        Preconditions.checkNotNull(createTableSql, "Missing createTableSql");
-        Preconditions.checkNotNull(dropTableSql, "Missing dropTableSql");
-        this.createTableSql = createTableSql;
-        this.dropTableSql = dropTableSql;
+        Preconditions.checkNotNull(createTableSqlFunc, "Missing createTableSqlFunc");
+        Preconditions.checkNotNull(dropTableSqlFunc, "Missing dropTableSqlFunc");
+        this.createTableSqlFunc = createTableSqlFunc;
+        this.dropTableSqlFunc = dropTableSqlFunc;
         this.tableName = tableName;
         this.readFunc = readFunc;
         this.getContentValuesForItemFunc = getContentValuesForItemFunc;
@@ -43,12 +43,12 @@ public class DatabaseContractBase<T> implements DatabaseContract<T> {
 
     @Override
     public String getCreateTable() {
-        return createTableSql;
+        return createTableSqlFunc.call(tableName);
     }
 
     @Override
     public String getDropTable() {
-        return dropTableSql;
+        return dropTableSqlFunc.call(tableName);
     }
 
     @Override
@@ -82,8 +82,8 @@ public class DatabaseContractBase<T> implements DatabaseContract<T> {
     }
 
     public static class Builder<T> {
-        private String createTableSql;
-        private String dropTableSql;
+        private Func1<String, String> createTableSqlFunc;
+        private Func1<String, String> dropTableSqlFunc;
         private String tableName;
         private Func1<Cursor, T> readFunc;
         private Func1<T, ContentValues> getContentValuesForItemFunc;
@@ -91,13 +91,13 @@ public class DatabaseContractBase<T> implements DatabaseContract<T> {
         private String defaultSortOrder;
         private Func1<Uri, String> getDefaultWhereFunc;
 
-        public Builder<T> setCreateTableSql(String createTableSql) {
-            this.createTableSql = createTableSql;
+        public Builder<T> setCreateTableSqlFunc(Func1<String, String> createTableSqlFunc) {
+            this.createTableSqlFunc = createTableSqlFunc;
             return this;
         }
 
-        public Builder<T> setDropTableSql(String dropTableSql) {
-            this.dropTableSql = dropTableSql;
+        public Builder<T> setDropTableSqlFunc(Func1<String, String> dropTableSqlFunc) {
+            this.dropTableSqlFunc = dropTableSqlFunc;
             return this;
         }
 
@@ -133,8 +133,8 @@ public class DatabaseContractBase<T> implements DatabaseContract<T> {
 
         public DatabaseContractBase<T> build() {
             return new DatabaseContractBase<T>(
-                    createTableSql,
-                    dropTableSql,
+                    createTableSqlFunc,
+                    dropTableSqlFunc,
                     tableName,
                     readFunc,
                     getContentValuesForItemFunc,

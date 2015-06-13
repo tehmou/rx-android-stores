@@ -15,7 +15,7 @@ import rx.functions.Func1;
  */
 public class DatabaseRouteBase implements DatabaseQueryRoute, DatabaseInsertUpdateRoute, DatabaseDeleteRoute {
     private final String tableName;
-    private final String path;
+    private final Func1<String, String> pathFunc;
     private final String sortOrder;
     private final Func1<Uri, String> getWhereFunc;
     private final String mimeType;
@@ -24,7 +24,7 @@ public class DatabaseRouteBase implements DatabaseQueryRoute, DatabaseInsertUpda
 
     private DatabaseRouteBase(Builder builder) {
         this.tableName = builder.tableName;
-        this.path = builder.path;
+        this.pathFunc = builder.pathFunc;
         this.sortOrder = builder.sortOrder;
         this.getWhereFunc = builder.getWhereFunc;
         this.mimeType = builder.mimeType;
@@ -53,7 +53,7 @@ public class DatabaseRouteBase implements DatabaseQueryRoute, DatabaseInsertUpda
 
     @Override
     public String getPath() {
-        return path;
+        return pathFunc.call(tableName);
     }
 
     @Override
@@ -73,7 +73,7 @@ public class DatabaseRouteBase implements DatabaseQueryRoute, DatabaseInsertUpda
 
     public static class Builder {
         private String tableName;
-        private String path;
+        private Func1<String, String> pathFunc;
         private String sortOrder;
         private Func1<Uri, String> getWhereFunc;
         private String mimeType;
@@ -99,8 +99,8 @@ public class DatabaseRouteBase implements DatabaseQueryRoute, DatabaseInsertUpda
             return this;
         }
 
-        public Builder setPath(String path) {
-            this.path = path;
+        public Builder setPathFunc(Func1<String, String> pathFunc) {
+            this.pathFunc = pathFunc;
             return this;
         }
 

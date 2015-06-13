@@ -6,9 +6,9 @@ import com.google.gson.Gson;
 import com.tehmou.rxandroidstores.contract.DatabaseContract;
 import com.tehmou.rxandroidstores.contract.DatabaseContractBase;
 import com.tehmou.rxandroidstores.example.pojo.Record;
-import com.tehmou.rxandroidstores.example.pojo.Record;
 import com.tehmou.rxandroidstores.provider.ContractContentProviderBase;
 import com.tehmou.rxandroidstores.route.DatabaseRouteBase;
+import com.tehmou.rxandroidstores.utils.DatabaseUtils;
 
 /**
  * Created by ttuo on 04/06/15.
@@ -45,8 +45,9 @@ public class RecordExampleContentProvider extends ContractContentProviderBase {
             recordContract = new DatabaseContractBase.Builder<Record>()
                     .setTableName("records")
                     .setProjection(new String[]{"id", "json"})
-                    .setCreateTableSql("CREATE TABLE records (id INTEGER, json TEXT NOT NULL)")
-                    .setDropTableSql("DROP TABLE IF EXISTS records")
+                    .setCreateTableSqlFunc(
+                            tableName -> "CREATE TABLE " + tableName + " (id INTEGER, json TEXT NOT NULL)")
+                    .setDropTableSqlFunc(DatabaseUtils.dropTableSqlFunc)
                     .setReadFunc(cursor -> {
                         final String json = cursor.getString(cursor.getColumnIndex("json"));
                         return gson.fromJson(json, Record.class);
@@ -67,9 +68,9 @@ public class RecordExampleContentProvider extends ContractContentProviderBase {
             // The root notifyChange is triggered automatically when
             // a value updates. No need to override.
             recordIdRoute = new DatabaseRouteBase.Builder(recordContract)
-                    .setMimeType("vnd.android.cursor.item/vnd.tehmou.android.rxandroidstores.record")
-                    .setPath(recordContract.getTableName() + "/*")
-                    .setGetWhereFunc(uri -> "id = " + uri.getLastPathSegment())
+                    .setMimeType("vnd.android.cursor.item/vnd.tehmou.rxandroidstores.example.pojo.record")
+                    .setPathFunc(DatabaseUtils.getIdPathFunc)
+                    .setGetWhereFunc(DatabaseUtils.getWhereByIdFunc)
                     .build();
         }
         return recordIdRoute;
@@ -78,8 +79,9 @@ public class RecordExampleContentProvider extends ContractContentProviderBase {
     public static DatabaseRouteBase getRootRoute() {
         if (recordRootRoute == null) {
             recordRootRoute = new DatabaseRouteBase.Builder(recordContract)
-                    .setPath(recordContract.getTableName())
-                    .setGetWhereFunc(uri -> null)
+                    .setMimeType("vnd.android.cursor.dir/vnd.tehmou.rxandroidstores.example.pojo.record")
+                    .setPathFunc(DatabaseUtils.getRootPathFunc)
+                    .setGetWhereFunc(DatabaseUtils.getWhereRootFunc)
                     .build();
         }
         return recordRootRoute;

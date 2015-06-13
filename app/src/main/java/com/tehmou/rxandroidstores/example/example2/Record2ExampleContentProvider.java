@@ -11,6 +11,7 @@ import com.tehmou.rxandroidstores.example.pojo.Record;
 import com.tehmou.rxandroidstores.provider.ContentProviderBase;
 import com.tehmou.rxandroidstores.provider.ContractContentProviderBase;
 import com.tehmou.rxandroidstores.route.DatabaseRouteBase;
+import com.tehmou.rxandroidstores.utils.DatabaseUtils;
 
 import java.util.List;
 
@@ -56,8 +57,9 @@ public class Record2ExampleContentProvider extends ContractContentProviderBase {
             record2Contract = new DatabaseContractBase.Builder<Record>()
                     .setTableName("records2")
                     .setProjection(new String[]{"id", "country", "json"})
-                    .setCreateTableSql("CREATE TABLE records2 (id INTEGER, country STRING, json TEXT NOT NULL)")
-                    .setDropTableSql("DROP TABLE IF EXISTS records2")
+                    .setCreateTableSqlFunc(
+                            tableName -> "CREATE TABLE " + tableName + " (id INTEGER, country STRING, json TEXT NOT NULL)")
+                    .setDropTableSqlFunc(DatabaseUtils.dropTableSqlFunc)
                     .setReadFunc(cursor -> {
                         final String json = cursor.getString(cursor.getColumnIndex("json"));
                         return gson.fromJson(json, Record.class);
@@ -78,8 +80,8 @@ public class Record2ExampleContentProvider extends ContractContentProviderBase {
         if (record2IdRoute == null) {
             DatabaseContract<Record> contract = getRecord2Contract();
             record2IdRoute = new DatabaseRouteBase.Builder(contract)
-                    .setMimeType("vnd.android.cursor.item/vnd.tehmou.android.rxandroidstores.record2")
-                    .setPath(contract.getTableName() + "/country/*/id/*")
+                    .setMimeType("vnd.android.cursor.item/vnd.tehmou.rxandroidstores.example.pojo.record2")
+                    .setPathFunc(tableName -> tableName + "/country/*/id/*")
                     .setGetWhereFunc(uri -> {
                         final List<String> pathSegments = uri.getPathSegments();
                         final String country = pathSegments.get(pathSegments.size() - 3);
@@ -103,8 +105,8 @@ public class Record2ExampleContentProvider extends ContractContentProviderBase {
         if (record2CountryRoute == null) {
             DatabaseContract<Record> contract = getRecord2Contract();
             record2CountryRoute = new DatabaseRouteBase.Builder(contract)
-                    .setMimeType("vnd.android.cursor.dir/vnd.tehmou.android.rxandroidstores.record2")
-                    .setPath(contract.getTableName() + "/country/*")
+                    .setMimeType("vnd.android.cursor.dir/vnd.tehmou.rxandroidstores.example.pojo.record2")
+                    .setPathFunc(tableName -> tableName + "/country/*")
                     .setGetWhereFunc(uri -> "country = '" + uri.getLastPathSegment() + "'")
                     .build();
         }
@@ -115,8 +117,8 @@ public class Record2ExampleContentProvider extends ContractContentProviderBase {
         if (record2RootRoute == null) {
             DatabaseContract<Record> contract = getRecord2Contract();
             record2RootRoute = new DatabaseRouteBase.Builder(contract)
-                    .setMimeType("vnd.android.cursor.dir/vnd.tehmou.android.rxandroidstores.record2")
-                    .setPath(contract.getTableName())
+                    .setMimeType("vnd.android.cursor.dir/vnd.tehmou.rxandroidstores.example.pojo.record2")
+                    .setPathFunc(DatabaseUtils.getRootPathFunc)
                     .setGetWhereFunc(uri -> null)
                     .build();
         }
