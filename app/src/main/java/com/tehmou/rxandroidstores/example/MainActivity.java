@@ -1,5 +1,7 @@
 package com.tehmou.rxandroidstores.example;
 
+import android.content.ContentResolver;
+import android.database.Cursor;
 import android.net.Uri;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -9,6 +11,7 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.tehmou.bettercontentprovider.R;
+import com.tehmou.rxandroidstores.example.example3.Record3ExampleContentProvider;
 import com.tehmou.rxandroidstores.example.pojo.CountryIdKey;
 import com.tehmou.rxandroidstores.example.pojo.Record;
 import com.tehmou.rxandroidstores.example.example2.Record2ByCountryStore;
@@ -17,6 +20,7 @@ import com.tehmou.rxandroidstores.example.example2.Record2IdStore;
 import com.tehmou.rxandroidstores.example.example1.RecordExampleContentProvider;
 import com.tehmou.rxandroidstores.example.example1.RecordIdStore;
 import com.tehmou.rxandroidstores.example.example1.RecordRootStore;
+import com.tehmou.rxandroidstores.example.pojo.User;
 
 import rx.android.schedulers.AndroidSchedulers;
 
@@ -33,6 +37,7 @@ public class MainActivity extends ActionBarActivity {
 
         example1();
         example2();
+        example3();
     }
 
     private void example1() {
@@ -67,7 +72,7 @@ public class MainActivity extends ActionBarActivity {
     private void example2() {
         // Clean up the DB
         getContentResolver().delete(
-                Uri.parse("content://" + Record2ExampleContentProvider.PROVIDER_NAME + "/records2"),
+                Uri.parse("content://" + Record2ExampleContentProvider.PROVIDER_NAME + "/records"),
                 null, null);
 
         // Record2 stores
@@ -89,6 +94,27 @@ public class MainActivity extends ActionBarActivity {
                     ((TextView) findViewById(R.id.text4)).setText(record2.getValue());
                 });
         record2IdStore.put(new Record(1234, "FIN", 100, "Success"));
+    }
+
+    private void example3() {
+        ContentResolver contentResolver = getContentResolver();
+
+        // Clean up the DB
+        contentResolver.delete(
+                Uri.parse("content://" + Record3ExampleContentProvider.PROVIDER_NAME + "/records"),
+                null, null);
+        contentResolver.delete(
+                Uri.parse("content://" + Record3ExampleContentProvider.PROVIDER_NAME + "/users"),
+                null, null);
+
+        final Record record = new Record(1234, "AU", 4, "Success");
+        final User user = new User(4, "Peter", "eater@example.com");
+        contentResolver.insert(
+                Uri.parse("content://" + Record3ExampleContentProvider.PROVIDER_NAME + "/records"),
+                Record3ExampleContentProvider.getRecordContract().getContentValuesForItem(record));
+        contentResolver.insert(
+                Uri.parse("content://" + Record3ExampleContentProvider.PROVIDER_NAME + "/users"),
+                Record3ExampleContentProvider.getUserContract().getContentValuesForItem(user));
     }
 
     @Override

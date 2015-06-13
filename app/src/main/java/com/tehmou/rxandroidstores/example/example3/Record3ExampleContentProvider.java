@@ -19,6 +19,7 @@ public class Record3ExampleContentProvider extends ContractContentProviderBase {
     private static DatabaseContractBase<Record> record3Contract;
     private static DatabaseContractBase<User> userContract;
     private static DatabaseRouteBase recordIdRoute;
+    private static DatabaseRouteBase recordRootRoute;
     private static DatabaseRouteBase userIdRoute;
     private static DatabaseRouteBase userForRecordIdRoute;
 
@@ -41,7 +42,7 @@ public class Record3ExampleContentProvider extends ContractContentProviderBase {
         addDatabaseContract(getRecordContract());
         addDatabaseContract(getUserContract());
 
-
+        addDatabaseDeleteRoute(getRecordRootRoute());
     }
 
     public static DatabaseContract<Record> getRecordContract() {
@@ -75,6 +76,17 @@ public class Record3ExampleContentProvider extends ContractContentProviderBase {
                     .build();
         }
         return recordIdRoute;
+    }
+
+    public static DatabaseRouteBase getRecordRootRoute() {
+        if (recordRootRoute == null) {
+            recordRootRoute = new DatabaseRouteBase.Builder(getRecordContract())
+                    .setMimeType("vnd.android.cursor.dir/vnd.tehmou.rxandroidstores.example.pojo.record")
+                    .setPathFunc(DatabaseUtils.getRootPathFunc)
+                    .setGetWhereFunc(DatabaseUtils.getWhereRootFunc)
+                    .build();
+        }
+        return recordRootRoute;
     }
 
     public static DatabaseRouteBase getUserIdRoute() {

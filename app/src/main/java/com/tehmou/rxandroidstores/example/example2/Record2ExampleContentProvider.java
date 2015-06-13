@@ -55,7 +55,7 @@ public class Record2ExampleContentProvider extends ContractContentProviderBase {
         if (record2Contract == null) {
             final Gson gson = new Gson();
             record2Contract = new DatabaseContractBase.Builder<Record>()
-                    .setTableName("records2")
+                    .setTableName("records")
                     .setProjection(new String[]{"id", "country", "json"})
                     .setCreateTableSqlFunc(
                             tableName -> "CREATE TABLE " + tableName + " (id INTEGER, country STRING, json TEXT NOT NULL)")
