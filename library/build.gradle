@@ -38,7 +38,7 @@ uploadArchives {
         pom.project {
             groupId 'com.tehmou'
             artifactId 'rx-android-stores'
-            version "0.0.1"
+            version "0.0.2"
         }
     }
 }
