@@ -2,6 +2,8 @@ package com.tehmou.rxandroidstores.route;
 
 import android.net.Uri;
 
+import java.util.Map;
+
 import rx.functions.Action1;
 
 /**
@@ -10,4 +12,5 @@ import rx.functions.Action1;
 public interface DatabaseQueryRoute extends DatabaseRoute {
     String getSortOrder();
     String getMimeType();
+    Map<String, String> getProjectionMap();
 }

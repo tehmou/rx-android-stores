@@ -1,31 +1,40 @@
 package com.tehmou.rxandroidstores.route;
 
+import android.content.ContentValues;
 import android.net.Uri;
 
 import com.tehmou.rxandroidstores.contract.DatabaseContract;
 
+import java.util.Map;
+
 import rx.functions.Action1;
 import rx.functions.Action2;
+import rx.functions.Action3;
+import rx.functions.Func0;
 import rx.functions.Func1;
 
 /**
  * Created by ttuo on 04/05/15.
  */
-public class DatabaseRouteBase implements DatabaseQueryRoute {
+public class DatabaseRouteBase implements DatabaseQueryRoute, DatabaseInsertUpdateRoute, DatabaseDeleteRoute {
     private final String tableName;
-    private final String path;
+    private final Func1<String, String> pathFunc;
     private final String sortOrder;
     private final Func1<Uri, String> getWhereFunc;
     private final String mimeType;
+    private Action3<ContentValues, Uri, Action1<Uri>> notifyChangeInsertFunc;
     private Action2<Uri, Action1<Uri>> notifyChangeFunc;
+    private Map<String, String> projectionMap;
 
     private DatabaseRouteBase(Builder builder) {
         this.tableName = builder.tableName;
-        this.path = builder.path;
+        this.pathFunc = builder.pathFunc;
         this.sortOrder = builder.sortOrder;
         this.getWhereFunc = builder.getWhereFunc;
         this.mimeType = builder.mimeType;
+        this.notifyChangeInsertFunc = builder.notifyChangeInsertFunc;
         this.notifyChangeFunc = builder.notifyChangeFunc;
+        this.projectionMap = builder.projectionMap;
     }
 
     @Override
@@ -38,8 +47,18 @@ public class DatabaseRouteBase implements DatabaseQueryRoute {
     }
 
     @Override
+    public void notifyChange(ContentValues contentValues, Uri uri, Action1<Uri> notifyChange) {
+        // First check the more specific notifyChange function
+        if (notifyChangeInsertFunc != null) {
+            notifyChangeInsertFunc.call(contentValues, uri, notifyChange);
+        } else {
+            notifyChangeFunc.call(uri, notifyChange);
+        }
+    }
+
+    @Override
     public String getPath() {
-        return path;
+        return pathFunc.call(tableName);
     }
 
     @Override
@@ -57,14 +76,21 @@ public class DatabaseRouteBase implements DatabaseQueryRoute {
         return mimeType;
     }
 
+    @Override
+    public Map<String, String> getProjectionMap() {
+        return projectionMap;
+    }
+
     public static class Builder {
         private String tableName;
-        private String path;
+        private Func1<String, String> pathFunc;
         private String sortOrder;
         private Func1<Uri, String> getWhereFunc;
         private String mimeType;
+        private Action3<ContentValues, Uri, Action1<Uri>> notifyChangeInsertFunc;
         private Action2<Uri, Action1<Uri>> notifyChangeFunc =
                 (uri, notifyChange) -> notifyChange.call(uri);
+        private Map<String, String> projectionMap;
 
         public Builder(DatabaseContract databaseContract) {
             this.tableName = databaseContract.getTableName();
@@ -72,13 +98,20 @@ public class DatabaseRouteBase implements DatabaseQueryRoute {
             this.getWhereFunc = databaseContract.getDefaultWhereFunc();
         }
 
-        public Builder setNotifyChangeFunc(Action2<Uri, Action1<Uri>> notifyChangeFunc) {
+        public Builder setNotifyChangeInsertFunc(
+                Action3<ContentValues, Uri, Action1<Uri>> notifyChangeInsertFunc) {
+            this.notifyChangeInsertFunc = notifyChangeInsertFunc;
+            return this;
+        }
+
+        public Builder setNotifyChangeFunc(
+                Action2<Uri, Action1<Uri>> notifyChangeFunc) {
             this.notifyChangeFunc = notifyChangeFunc;
             return this;
         }
 
-        public Builder setPath(String path) {
-            this.path = path;
+        public Builder setPathFunc(Func1<String, String> pathFunc) {
+            this.pathFunc = pathFunc;
             return this;
         }
 
@@ -97,7 +130,12 @@ public class DatabaseRouteBase implements DatabaseQueryRoute {
             return this;
         }
 
-        public DatabaseQueryRoute build() {
+        public Builder setProjectionMap(Map<String, String> projectionMap) {
+            this.projectionMap = projectionMap;
+            return this;
+        }
+
+        public DatabaseRouteBase build() {
             return new DatabaseRouteBase(this);
         }
     }

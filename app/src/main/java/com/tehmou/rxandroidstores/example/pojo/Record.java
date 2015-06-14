@@ -3,13 +3,13 @@ package com.tehmou.rxandroidstores.example.pojo;
 /**
  * Created by ttuo on 11/06/15.
  */
-public class Foobar2 {
+public class Record {
     private final int id;
     private final String country;
     private final int userId;
     private final String value;
 
-    public Foobar2(int id,
+    public Record(int id,
                   String country,
                   int userId,
                   String value) {

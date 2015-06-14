@@ -19,7 +19,7 @@ import rx.subjects.Subject;
 /**
  * Created by ttuo on 11/06/15.
  */
-public abstract class ListContentProviderStoreBase<T, U> extends ContentProviderStoreBase<T, U> {
+public abstract class ListContentProviderStoreBase<T, U> extends ContentProviderStoreBase<U> {
     private static final String TAG = ListContentProviderStoreBase.class.getSimpleName();
     private final ConcurrentMap<Uri, Subject<List<U>, List<U>>> subjectMap = new ConcurrentHashMap<>();
 
@@ -45,6 +45,7 @@ public abstract class ListContentProviderStoreBase<T, U> extends ContentProvider
                 Log.v(TAG, "onChange(" + uri + ")");
 
                 if (subjectMap.containsKey(uri)) {
+                    Log.v(TAG, "Updating subject at: " + uri + ")");
                     subjectMap.get(uri).onNext(queryList(uri));
                 }
             }
@@ -63,8 +64,11 @@ public abstract class ListContentProviderStoreBase<T, U> extends ContentProvider
     }
 
     private Observable<List<U>> lazyGetSubject(T id) {
-        Log.v(TAG, "lazyGetSubject(" + id + ")");
-        final Uri uri = getUriForKey(id);
+        return lazyGetSubject(getUriForKey(id));
+    }
+
+    private Observable<List<U>> lazyGetSubject(Uri uri) {
+        Log.v(TAG, "lazyGetSubject(" + uri + ")");
         subjectMap.putIfAbsent(uri, PublishSubject.<List<U>>create());
         return subjectMap.get(uri);
     }
