@@ -11,6 +11,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.tehmou.rxandroidstores.contract.DatabaseContract;
+import com.tehmou.rxandroidstores.route.DatabaseQueryRoute;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,11 +25,10 @@ import rx.subjects.Subject;
 /**
  * Created by ttuo on 26/04/15.
  */
-abstract public class ContentProviderStoreBase<T, U> {
+public abstract class ContentProviderStoreBase<U> {
     private static final String TAG = ContentProviderStoreBase.class.getSimpleName();
 
     protected final ContentResolver contentResolver;
-    private final ConcurrentMap<Uri, Subject<U, U>> subjectMap = new ConcurrentHashMap<>();
     protected final DatabaseContract<U> databaseContract;
     private final ContentObserver contentObserver = getContentObserver();
 
@@ -41,51 +41,13 @@ abstract public class ContentProviderStoreBase<T, U> {
     }
 
     @NonNull
-    private ContentObserver getContentObserver() {
-        return new ContentObserver(createHandler(this.getClass().getSimpleName())) {
-            @Override
-            public void onChange(boolean selfChange, Uri uri) {
-                super.onChange(selfChange, uri);
-                Log.v(TAG, "onChange(" + uri + ")");
-
-                if (subjectMap.containsKey(uri)) {
-                    subjectMap.get(uri).onNext(query(uri));
-                }
-            }
-        };
-    }
-
-    @NonNull
-    private static Handler createHandler(String name) {
+    protected static Handler createHandler(String name) {
         HandlerThread handlerThread = new HandlerThread(name);
         handlerThread.start();
         return new Handler(handlerThread.getLooper());
     }
 
-    public void put(U item) {
-        insertOrUpdate(item);
-    }
-
-    public Observable<U> getStream(T id) {
-        Log.v(TAG, "getStream(" + id + ")");
-        final U item = query(id);
-        final Observable<U> observable = lazyGetSubject(id);
-        if (item != null) {
-            Log.v(TAG, "Found existing item for id=" + id);
-            return observable.startWith(item);
-        }
-        return observable;
-    }
-
-    private Observable<U> lazyGetSubject(T id) {
-        Log.v(TAG, "lazyGetSubject(" + id + ")");
-        final Uri uri = getUriForKey(id);
-        subjectMap.putIfAbsent(uri, PublishSubject.<U>create());
-        return subjectMap.get(uri);
-    }
-
-    public void insertOrUpdate(U item) {
-        Uri uri = getUriForKey(getIdFor(item));
+    protected void insertOrUpdate(U item, Uri uri) {
         Log.v(TAG, "insertOrUpdate to " + uri);
         ContentValues values = getContentValuesForItem(item);
         Log.v(TAG, "values(" + values + ")");
@@ -95,15 +57,6 @@ abstract public class ContentProviderStoreBase<T, U> {
         } else {
             Log.v(TAG, "Updated at " + uri);
         }
-    }
-
-    protected U query(T id) {
-        return query(getUriForKey(id));
-    }
-
-    protected U query(Uri uri) {
-        List<U> list = queryList(uri);
-        return list.size() > 0 ? list.get(0) : null;
     }
 
     protected List<U> queryList(Uri uri) {
@@ -130,11 +83,6 @@ abstract public class ContentProviderStoreBase<T, U> {
         return databaseContract.getContentValuesForItem(item);
     }
 
-    public Uri getUriForKey(T id) {
-        return Uri.withAppendedPath(getContentUriBase(), id.toString());
-    }
-
-    abstract protected Uri getContentUriBase();
-
-    abstract protected T getIdFor(U item);
+    protected abstract Uri getContentUriBase();
+    protected abstract ContentObserver getContentObserver();
 }

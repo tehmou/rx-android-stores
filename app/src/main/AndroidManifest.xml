@@ -18,8 +18,20 @@
         </activity>
 
         <provider
-            android:authorities="com.tehmou.rxandroidstores.example.provider.ExampleContentProvider"
-            android:name="com.tehmou.rxandroidstores.example.provider.ExampleContentProvider"
+            android:authorities="com.tehmou.rxandroidstores.example.example1.RecordExampleContentProvider"
+            android:name="com.tehmou.rxandroidstores.example.example1.RecordExampleContentProvider"
+            android:exported="false">
+        </provider>
+
+        <provider
+            android:authorities="com.tehmou.rxandroidstores.example.example2.Record2ExampleContentProvider"
+            android:name="com.tehmou.rxandroidstores.example.example2.Record2ExampleContentProvider"
+            android:exported="false">
+        </provider>
+
+        <provider
+            android:authorities="com.tehmou.rxandroidstores.example.example3.Record3ExampleContentProvider"
+            android:name="com.tehmou.rxandroidstores.example.example3.Record3ExampleContentProvider"
             android:exported="false">
         </provider>
     </application>
