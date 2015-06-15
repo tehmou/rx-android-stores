@@ -19,65 +19,32 @@ Using the library
 
 ### Defining the ContentProvider
 
-This is an entire ContentProvider declaration:
-
-    public class ExampleContentProvider extends ContractContentProviderBase {
-        public static final String PROVIDER_NAME = "com.tehmou.rxandroidstores.example.provider.ExampleContentProvider";
-        private static final String DATABASE_NAME = "database";
-        private static final int DATABASE_VERSION = 1;
-
-        public ExampleContentProvider() {
-            DatabaseContract<Foobar> contract = createFoobarContract();
-            addDatabaseContract(contract);
-            addDatabaseRoute(
-                    new DatabaseRouteBase.Builder(contract)
-                            .setMimeType("vnd.android.cursor.item/vnd.tehmou.android.rxandroidstores.foobar")
-                            .setPath(contract.getTableName() + "/*")
-                            .build());
-        }
-
-        public static DatabaseContract<Foobar> createFoobarContract() {
-            return SerializedJsonContract.<Foobar>createBuilder(
-                    "foobars", "INTEGER", Foobar.class, value -> {
-                        ContentValues contentValues = new ContentValues();
-                        contentValues.put(SerializedJsonContract.ID, value.getId());
-                        return contentValues;
-                    })
-                    .build();
-        }
-
-        @Override
-        protected String getProviderName() {
-            return PROVIDER_NAME;
-        }
-
-        @Override
-        protected String getDatabaseName() {
-            return DATABASE_NAME;
-        }
-
-        @Override
-        protected int getDatabaseVersion() {
-            return DATABASE_VERSION;
-        }
-    }
+There are a few examples in the repository, you can see for instance [the first example](https://github.com/tehmou/rx-android-stores/blob/master/app/src/main/java/com/tehmou/rxandroidstores/example/example1/RecordExampleContentProvider.java)
 
 
 ### Defining a contract
 
 Contract represent a table in the database.
 
-SerializedJsonContract is helper to make a table that serializes the items as json strings, queryable with an id.
-
 Here we create a json table of the name "foobars" and id column type integer. The value converter is the last, which adds the id field to the ContentValues.
 
-    SerializedJsonContract.<Foobar>createBuilder(
-            "foobars", "INTEGER", Foobar.class, value -> {
+    new DatabaseContractBase.Builder<Record>()
+            .setTableName("records")
+            .setProjection(new String[]{"id", "json"})
+            .setCreateTableSqlFunc(
+                    tableName -> "CREATE TABLE " + tableName + " (id INTEGER, json TEXT NOT NULL)")
+            .setDropTableSqlFunc(DatabaseUtils.dropTableSqlFunc)
+            .setReadFunc(cursor -> {
+                final String json = cursor.getString(cursor.getColumnIndex("json"));
+                return gson.fromJson(json, Record.class);
+            })
+            .setGetContentValuesForItemFunc(record -> {
                 ContentValues contentValues = new ContentValues();
-                contentValues.put(SerializedJsonContract.ID, value.getId());
+                contentValues.put("id", record.getId());
+                contentValues.put("json", gson.toJson(record));
                 return contentValues;
             })
-            .build()
+            .build();
 
 
 ### Defining routes
@@ -88,7 +55,8 @@ This would match any uri of form "foobars/1234":
 
     new DatabaseRouteBase.Builder(contract)
             .setMimeType("vnd.android.cursor.item/vnd.tehmou.android.rxandroidstores.foobar")
-            .setPath(contract.getTableName() + "/*")
+            .setPathFunc(DatabaseUtils.getIdPathFunc)
+            .setGetWhereFunc(DatabaseUtils.getWhereByIdFunc)
             .build());
 
 
@@ -96,8 +64,8 @@ This can be used for querying all foobars with "foobars":
 
     new DatabaseRouteBase.Builder(contract)
             .setMimeType("vnd.android.cursor.dir/vnd.tehmou.android.rxandroidstores.foobar")
-            .setPath(contract.getTableName())
-            .setGetWhereFunc(uri -> null)
+            .setPathFunc(DatabaseUtils.getRootPathFunc)
+            .setGetWhereFunc(DatabaseUtils.getWhereRootFunc)
             .build());
 
 
@@ -149,5 +117,5 @@ Importing the library
     }
 
     dependencies {
-        compile 'com.tehmou:rx-android-stores:0.0.1'
+        compile 'com.tehmou:rx-android-stores:0.0.2'
     }
